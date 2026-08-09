@@ -1,17 +1,24 @@
 const express = require("express");
+const cors = require("cors");
+const helmet = require("helmet");
+
 const notFound = require("./middleware/notFound");
 const errorHandler = require("./middleware/errorMiddleware");
 const apiRoutes = require("./routes");
-const helmet = require("helmet");
 const apiLimiter = require("./middleware/rateLimiter");
-const app = express();
 
+const app = express();
 
 app.use(helmet());
 
+app.use(
+    cors({
+        origin: "http://localhost:5173",
+        credentials: true
+    })
+);
+
 app.use(express.json());
-app.use("/api", apiLimiter);
-app.use("/api", apiRoutes);
 
 app.get("/", (req, res) => {
     res.json({
@@ -20,6 +27,7 @@ app.get("/", (req, res) => {
     });
 });
 
+app.use("/api", apiLimiter);
 app.use("/api", apiRoutes);
 
 app.use(notFound);
