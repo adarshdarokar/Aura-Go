@@ -3,6 +3,7 @@ const dotenv = require("dotenv");
 const connectDB = require("./config/db");
 const notFound = require("./middleware/notFound");
 const errorHandler = require("./middleware/errorMiddleware");
+const apiRoutes = require("./routes");
 
 dotenv.config();
 
@@ -11,8 +12,6 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(express.json());
-app.use(notFound);
-app.use(errorHandler);
 
 app.get("/", (req, res) => {
     res.json({
@@ -20,6 +19,12 @@ app.get("/", (req, res) => {
         message: "AURA GO API is running"
     });
 });
+
+app.use("/api", apiRoutes);
+
+// Error handling — ALWAYS AFTER ROUTES
+app.use(notFound);
+app.use(errorHandler);
 
 const startServer = async () => {
     try {
