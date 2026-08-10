@@ -3,6 +3,13 @@ const {
     loginUser
 } = require("../services/authService");
 
+const {
+    generateAccessToken,
+    generateRefreshToken
+} = require("../services/tokenService");
+
+const { setAuthCookies } = require("../utils/cookie");
+
 const register = async (req, res, next) => {
     try {
         const { name, email, password } = req.body;
@@ -38,6 +45,11 @@ const login = async (req, res, next) => {
             password
         });
 
+        const accessToken = generateAccessToken(user._id);
+        const refreshToken = generateRefreshToken(user._id);
+
+        setAuthCookies(res, accessToken, refreshToken);
+
         return res.status(200).json({
             success: true,
             message: "Login successful",
@@ -54,7 +66,23 @@ const login = async (req, res, next) => {
     }
 };
 
+const me = async (req, res, next) => {
+    try {
+        return res.status(200).json({
+            success: true,
+            data: {
+                user: {
+                    id: req.user.id
+                }
+            }
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
     register,
-    login
+    login,
+    me
 };
