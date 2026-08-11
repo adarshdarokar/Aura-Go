@@ -5,17 +5,23 @@ const setAuthCookies = (res, accessToken, refreshToken) => {
         httpOnly: true,
         secure: isProduction,
         sameSite: isProduction ? "none" : "lax",
-        maxAge: 15 * 60 * 1000
+        maxAge: 15 * 60 * 1000,
     });
 
     res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
         secure: isProduction,
         sameSite: isProduction ? "none" : "lax",
-        maxAge: 7 * 24 * 60 * 60 * 1000
+        maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 };
 
+const clearAuthCookies = (res) => {
+    res.clearCookie("accessToken");
+    res.clearCookie("refreshToken");
+};
+
 module.exports = {
-    setAuthCookies
+    setAuthCookies,
+    clearAuthCookies,
 };

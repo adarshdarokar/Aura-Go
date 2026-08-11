@@ -3,7 +3,8 @@ const {
     loginUser,
     createSession,
     attachRefreshToken,
-    refreshSession
+    refreshSession,
+    logoutSession
 } = require("../services/authService");
 
 const {
@@ -11,7 +12,12 @@ const {
     generateRefreshToken
 } = require("../services/tokenService");
 
-const { setAuthCookies } = require("../utils/cookie");
+const {
+    setAuthCookies,
+    clearAuthCookies
+} = require("../utils/cookie");
+
+/* ---------- Register ---------- */
 
 const register = async (req, res, next) => {
     try {
@@ -38,6 +44,8 @@ const register = async (req, res, next) => {
         next(error);
     }
 };
+
+/* ---------- Login ---------- */
 
 const login = async (req, res, next) => {
     try {
@@ -83,6 +91,9 @@ const login = async (req, res, next) => {
         next(error);
     }
 };
+
+/* ---------- Current User ---------- */
+
 const me = async (req, res, next) => {
     try {
         return res.status(200).json({
@@ -98,6 +109,8 @@ const me = async (req, res, next) => {
     }
 };
 
+/* ---------- Refresh Token ---------- */
+
 const refresh = async (req, res, next) => {
     try {
         const refreshToken = req.cookies.refreshToken;
@@ -111,9 +124,25 @@ const refresh = async (req, res, next) => {
 
         const session = await refreshSession(refreshToken);
 
-        const accessToken = generateAccessToken(session.user);
+        const accessToken = generateAccessToken(
+            session.user
+        );
 
-        setAuthCookies(res, accessToken, refreshToken);
+        const newRefreshToken = generateRefreshToken(
+            session.user,
+            session._id
+        );
+
+        await attachRefreshToken(
+            session._id,
+            newRefreshToken
+        );
+
+        setAuthCookies(
+            res,
+            accessToken,
+            newRefreshToken
+        );
 
         return res.status(200).json({
             success: true,
@@ -124,9 +153,29 @@ const refresh = async (req, res, next) => {
     }
 };
 
+/* ---------- Logout ---------- */
+
+const logout = async (req, res, next) => {
+    try {
+        const refreshToken = req.cookies.refreshToken;
+
+        await logoutSession(refreshToken);
+
+        clearAuthCookies(res);
+
+        return res.status(200).json({
+            success: true,
+            message: "Logout successful"
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
     register,
     login,
     me,
-    refresh
+    refresh,
+    logout
 };

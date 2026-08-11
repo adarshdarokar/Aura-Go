@@ -155,10 +155,36 @@ const refreshSession = async (refreshToken) => {
     return session;
 };
 
+const logoutSession = async (refreshToken) => {
+    if (!refreshToken) {
+        return;
+    }
+
+    let decoded;
+
+    try {
+        decoded = jwt.verify(
+            refreshToken,
+            authConfig.jwtSecret
+        );
+    } catch (error) {
+        return;
+    }
+
+    if (!decoded.sessionId) {
+        return;
+    }
+
+    await Session.deleteOne({
+        _id: decoded.sessionId
+    });
+};
+
 module.exports = {
     registerUser,
     loginUser,
     createSession,
     attachRefreshToken,
-    refreshSession
+    refreshSession,
+    logoutSession
 };
