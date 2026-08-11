@@ -25,6 +25,21 @@ const generateRefreshToken = (userId) => {
     );
 };
 
+const hashRefreshToken = async (refreshToken) => {
+    return bcrypt.hash(refreshToken, 12);
+};
+
+const compareRefreshToken = async (
+    refreshToken,
+    refreshTokenHash
+) => {
+    return bcrypt.compare(
+        refreshToken,
+        refreshTokenHash
+    );
+};
+
+
 module.exports = {
     generateAccessToken,
     generateRefreshToken

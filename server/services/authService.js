@@ -1,4 +1,9 @@
 const User = require("../models/User");
+const Session = require("../models/Session");
+
+const {
+    hashRefreshToken
+} = require("./tokenService");
 
 const registerUser = async ({ name, email, password }) => {
     const existingUser = await User.findOne({ email });
@@ -38,7 +43,24 @@ const loginUser = async ({ email, password }) => {
     return user;
 };
 
+const createSession = async (userId, refreshToken) => {
+    const refreshTokenHash = await hashRefreshToken(refreshToken);
+
+    const expiresAt = new Date(
+        Date.now() + 7 * 24 * 60 * 60 * 1000
+    );
+
+    const session = await Session.create({
+        user: userId,
+        refreshTokenHash,
+        expiresAt
+    });
+
+    return session;
+};
+
 module.exports = {
     registerUser,
-    loginUser
+    loginUser,
+    createSession
 };
