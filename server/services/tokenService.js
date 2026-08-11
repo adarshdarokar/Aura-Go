@@ -1,5 +1,9 @@
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
+
 const authConfig = require("../config/auth");
+
+/* ---------- Access Token ---------- */
 
 const generateAccessToken = (userId) => {
     return jwt.sign(
@@ -13,10 +17,13 @@ const generateAccessToken = (userId) => {
     );
 };
 
-const generateRefreshToken = (userId) => {
+/* ---------- Refresh Token ---------- */
+
+const generateRefreshToken = (userId, sessionId) => {
     return jwt.sign(
         {
-            userId
+            userId,
+            sessionId
         },
         authConfig.jwtSecret,
         {
@@ -25,9 +32,13 @@ const generateRefreshToken = (userId) => {
     );
 };
 
+/* ---------- Refresh Token Hash ---------- */
+
 const hashRefreshToken = async (refreshToken) => {
     return bcrypt.hash(refreshToken, 12);
 };
+
+/* ---------- Refresh Token Compare ---------- */
 
 const compareRefreshToken = async (
     refreshToken,
@@ -39,8 +50,9 @@ const compareRefreshToken = async (
     );
 };
 
-
 module.exports = {
     generateAccessToken,
-    generateRefreshToken
+    generateRefreshToken,
+    hashRefreshToken,
+    compareRefreshToken
 };

@@ -13,11 +13,12 @@ const sessionSchema = new mongoose.Schema(
             type: String,
             required: true
         },
-
         expiresAt: {
             type: Date,
             required: true,
-            index: true
+            index: {
+                expireAfterSeconds: 0
+            }
         }
     },
     {

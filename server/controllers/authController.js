@@ -1,6 +1,9 @@
 const {
     registerUser,
-    loginUser
+    loginUser,
+    createSession,
+    attachRefreshToken,
+    refreshSession
 } = require("../services/authService");
 
 const {
@@ -46,9 +49,24 @@ const login = async (req, res, next) => {
         });
 
         const accessToken = generateAccessToken(user._id);
-        const refreshToken = generateRefreshToken(user._id);
 
-        setAuthCookies(res, accessToken, refreshToken);
+        const session = await createSession(user._id);
+
+        const refreshToken = generateRefreshToken(
+            user._id,
+            session._id
+        );
+
+        await attachRefreshToken(
+            session._id,
+            refreshToken
+        );
+
+        setAuthCookies(
+            res,
+            accessToken,
+            refreshToken
+        );
 
         return res.status(200).json({
             success: true,
@@ -65,7 +83,6 @@ const login = async (req, res, next) => {
         next(error);
     }
 };
-
 const me = async (req, res, next) => {
     try {
         return res.status(200).json({
@@ -81,8 +98,35 @@ const me = async (req, res, next) => {
     }
 };
 
+const refresh = async (req, res, next) => {
+    try {
+        const refreshToken = req.cookies.refreshToken;
+
+        if (!refreshToken) {
+            return res.status(401).json({
+                success: false,
+                message: "Refresh token required"
+            });
+        }
+
+        const session = await refreshSession(refreshToken);
+
+        const accessToken = generateAccessToken(session.user);
+
+        setAuthCookies(res, accessToken, refreshToken);
+
+        return res.status(200).json({
+            success: true,
+            message: "Token refreshed successfully"
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
     register,
     login,
-    me
+    me,
+    refresh
 };
