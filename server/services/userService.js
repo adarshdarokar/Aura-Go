@@ -34,6 +34,11 @@ const updateUserProfile = async (
             updates[field] = profileData[field];
         }
     }
+    if (Object.keys(updates).length === 0) {
+        const error = new Error("No valid profile fields provided");
+        error.statusCode = 400;
+        throw error;
+    }
 
     const user = await User.findByIdAndUpdate(
         userId,
