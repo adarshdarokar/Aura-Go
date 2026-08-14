@@ -1,0 +1,59 @@
+const User = require("../models/User");
+
+const getUserProfile = async (userId) => {
+    const user = await User.findById(userId).select(
+        "-password"
+    );
+
+    if (!user) {
+        const error = new Error("User not found");
+        error.statusCode = 404;
+        throw error;
+    }
+
+    return user;
+};
+
+const updateUserProfile = async (
+    userId,
+    profileData
+) => {
+    const allowedFields = [
+        "age",
+        "gender",
+        "height",
+        "weight",
+        "fitnessLevel",
+        "goal"
+    ];
+
+    const updates = {};
+
+    for (const field of allowedFields) {
+        if (profileData[field] !== undefined) {
+            updates[field] = profileData[field];
+        }
+    }
+
+    const user = await User.findByIdAndUpdate(
+        userId,
+        updates,
+        {
+            new: true,
+            runValidators: true
+        }
+    ).select("-password");
+
+    if (!user) {
+        const error = new Error("User not found");
+        error.statusCode = 404;
+        throw error;
+    }
+
+    return user;
+};
+
+module.exports = {
+    getUserProfile,
+    updateUserProfile
+};
