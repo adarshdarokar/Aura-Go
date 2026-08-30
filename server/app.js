@@ -30,6 +30,11 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api", apiLimiter);
+
+app.use((req, res, next) => {
+    console.log("REQUEST:", req.method, req.originalUrl);
+    next();
+});
 app.use("/api", apiRoutes);
 
 app.use(notFound);
