@@ -4,11 +4,13 @@ const userRoutes = require("./userRoutes");
 const exerciseRoutes = require("./exerciseRoutes");
 const router = express.Router();
 const workoutRoutes = require("./workoutRoutes");
+const nutritionRoutes = require("./nutritionRoutes");
 
 router.use("/auth", authRoutes);
 router.use("/users", userRoutes);
 router.use("/exercises", exerciseRoutes);
 router.use("/workouts", workoutRoutes);
+router.use("/nutrition", nutritionRoutes);
 
 router.get("/health", (req, res) => {
     res.json({
