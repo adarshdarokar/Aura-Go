@@ -1,27 +1,279 @@
 import { useState } from "react";
-import backgroundImage from "../assets/background-img.png";
+import axios from "axios";
 
-import Button from "../components/Button";
-import Input from "../components/Input";
+import desktopBackground from "../assets/background-img.png";
+import mobileBackground from "../assets/background-phimg.png";
+
+import AuthContent from "../components/AuthContent";
+
+const API_URL =
+    import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 function Auth() {
     const [mode, setMode] = useState("login");
 
+    const [formData, setFormData] = useState({
+        name: "",
+        email: "",
+        password: "",
+        confirmPassword: ""
+    });
+
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
+
     const isLogin = mode === "login";
 
+    const handleChange = (event) => {
+        const { name, value } = event.target;
+
+        setFormData((previous) => ({
+            ...previous,
+            [name]: value
+        }));
+
+        setError("");
+        setSuccess("");
+    };
+
+    const handleModeChange = (nextMode) => {
+        setMode(nextMode);
+
+        setError("");
+        setSuccess("");
+
+        setFormData({
+            name: "",
+            email: "",
+            password: "",
+            confirmPassword: ""
+        });
+    };
+
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+
+        setError("");
+        setSuccess("");
+
+        const name = formData.name.trim();
+        const email = formData.email.trim();
+        const password = formData.password;
+        const confirmPassword = formData.confirmPassword;
+
+        /* =====================================================
+           FRONTEND VALIDATION
+           ===================================================== */
+
+        if (!email || !password) {
+            setError("Email and password are required.");
+            return;
+        }
+
+        if (!isLogin) {
+            if (!name) {
+                setError("Full name is required.");
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                setError("Passwords do not match.");
+                return;
+            }
+        }
+
+        try {
+            setLoading(true);
+
+            /* =================================================
+               LOGIN
+               ================================================= */
+
+            if (isLogin) {
+                const response = await axios.post(
+                    `${API_URL}/auth/login`,
+                    {
+                        email,
+                        password
+                    },
+                    {
+                        withCredentials: true
+                    }
+                );
+
+                if (response.data?.success === false) {
+                    throw new Error(
+                        response.data?.message ||
+                        "Login failed."
+                    );
+                }
+
+                setSuccess(
+                    response.data?.message ||
+                    "Login successful."
+                );
+
+                return;
+            }
+
+            /* =================================================
+               SIGNUP
+               ================================================= */
+
+            const response = await axios.post(
+                `${API_URL}/auth/register`,
+                {
+                    name,
+                    email,
+                    password
+                },
+                {
+                    withCredentials: true
+                }
+            );
+
+            if (response.data?.success === false) {
+                throw new Error(
+                    response.data?.message ||
+                    "Account creation failed."
+                );
+            }
+
+            setSuccess(
+                response.data?.message ||
+                "Account created successfully."
+            );
+        } catch (error) {
+            const message =
+                error.response?.data?.message ||
+                error.message ||
+                "Something went wrong. Please try again.";
+
+            setError(message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
-        <main className="relative min-h-[100dvh] overflow-x-hidden bg-[#241b15] font-sans text-[#f4eadf]">
+        <main className="h-[100dvh] overflow-hidden bg-[#241b15] font-sans text-[#f4eadf]">
 
             {/* =====================================================
-                BACKGROUND
+                MOBILE
+                IMAGE 35% + FORM 65%
                 ===================================================== */}
 
-            <div className="fixed inset-0 z-0">
+            <section className="flex h-[100dvh] w-full flex-col overflow-hidden md:hidden">
+
+                {/* =================================================
+                    MOBILE IMAGE
+                    ================================================= */}
+
+                <div className="relative h-[35%] min-h-0 w-full shrink-0 overflow-hidden">
+
+                    <img
+                        src={mobileBackground}
+                        alt="AURA GO gym"
+                        className="
+                            h-full
+                            w-full
+                            object-cover
+                            object-center
+                        "
+                    />
+
+                    <div
+                        className="
+                            pointer-events-none
+                            absolute
+                            inset-0
+                            bg-[#241b15]/[0.035]
+                        "
+                    />
+
+                </div>
+
+                {/* =================================================
+                    MOBILE FORM
+                    ================================================= */}
+
+                <div
+                    className="
+                        relative
+                        z-10
+                        h-[65%]
+                        min-h-0
+                        w-full
+                        shrink-0
+                        overflow-hidden
+                        rounded-t-[24px]
+                        border
+                        border-[#e4c5a5]/[0.20]
+                        bg-[#30231b]/[0.46]
+                        shadow-[0_24px_80px_rgba(25,12,5,0.28)]
+                        backdrop-blur-[13px]
+                    "
+                >
+
+                    <div
+                        className="
+                            flex
+                            h-full
+                            w-full
+                            items-center
+                            justify-center
+                            overflow-hidden
+                            px-5
+                            py-4
+                            sm:px-7
+                            sm:py-5
+                        "
+                    >
+
+                        <div className="w-full max-w-[360px]">
+
+                            <AuthContent
+                                isLogin={isLogin}
+                                setMode={handleModeChange}
+                                mobile={true}
+                                formData={formData}
+                                handleChange={handleChange}
+                                handleSubmit={handleSubmit}
+                                loading={loading}
+                                error={error}
+                                success={success}
+                            />
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+            {/* =====================================================
+                TABLET + DESKTOP
+                ===================================================== */}
+
+            <section
+                className="
+                    relative
+                    hidden
+                    h-[100dvh]
+                    w-full
+                    overflow-hidden
+                    md:block
+                "
+            >
 
                 <img
-                    src={backgroundImage}
+                    src={desktopBackground}
                     alt="AURA GO gym"
                     className="
+                        absolute
+                        inset-0
                         h-full
                         w-full
                         object-cover
@@ -29,58 +281,57 @@ function Auth() {
                     "
                 />
 
-                {/* Natural dark cinematic layer */}
                 <div
                     className="
+                        pointer-events-none
                         absolute
                         inset-0
-                        bg-[#241b15]/[0.08]
+                        bg-[#241b15]/[0.035]
                     "
                 />
 
-                {/* Bottom depth */}
                 <div
                     className="
+                        pointer-events-none
                         absolute
                         inset-x-0
                         bottom-0
-                        h-[35%]
+                        h-[30%]
                         bg-gradient-to-t
-                        from-[#241b15]/[0.32]
+                        from-[#241b15]/[0.20]
                         via-transparent
                         to-transparent
                     "
                 />
 
-            </div>
+                <div
+                    className="
+                        relative
+                        z-10
+                        flex
+                        h-[100dvh]
+                        items-center
+                        justify-center
+                        px-6
+                        py-8
+                        lg:px-10
+                    "
+                >
 
+                    <AuthCard
+                        isLogin={isLogin}
+                        setMode={handleModeChange}
+                        formData={formData}
+                        handleChange={handleChange}
+                        handleSubmit={handleSubmit}
+                        loading={loading}
+                        error={error}
+                        success={success}
+                    />
 
-            {/* =====================================================
-                CONTENT
-                ===================================================== */}
+                </div>
 
-            <div
-                className="
-                    relative
-                    z-10
-                    flex
-                    min-h-[100dvh]
-                    items-center
-                    justify-center
-                    px-4
-                    py-6
-                    sm:px-6
-                    sm:py-8
-                    lg:px-10
-                "
-            >
-
-                <AuthCard
-                    isLogin={isLogin}
-                    setMode={setMode}
-                />
-
-            </div>
+            </section>
 
         </main>
     );
@@ -88,280 +339,54 @@ function Auth() {
 
 
 /* =========================================================
-   AUTH CARD
+   DESKTOP AUTH CARD
    ========================================================= */
 
 function AuthCard({
     isLogin,
-    setMode
+    setMode,
+    formData,
+    handleChange,
+    handleSubmit,
+    loading,
+    error,
+    success
 }) {
     return (
         <div
             className="
                 w-full
+                max-w-[340px]
+                lg:max-w-[360px]
 
-                max-w-[330px]
-
-                sm:max-w-[350px]
-
-                md:max-w-[360px]
-
-                lg:max-w-[370px]
-
-                rounded-[22px]
+                rounded-[20px]
 
                 border
-                border-[#e8cdb0]/[0.20]
+                border-[#e4c5a5]/[0.20]
 
-                bg-[#33251c]/[0.52]
+                bg-[#30231b]/[0.46]
 
                 p-5
-
                 sm:p-6
 
-                md:p-7
+                shadow-[0_24px_80px_rgba(25,12,5,0.28)]
 
-                shadow-[0_24px_80px_rgba(25,12,5,0.30)]
-
-                backdrop-blur-[14px]
+                backdrop-blur-[13px]
             "
         >
 
             <AuthContent
                 isLogin={isLogin}
                 setMode={setMode}
+                formData={formData}
+                handleChange={handleChange}
+                handleSubmit={handleSubmit}
+                loading={loading}
+                error={error}
+                success={success}
             />
 
         </div>
-    );
-}
-
-
-/* =========================================================
-   AUTH CONTENT
-   ========================================================= */
-
-function AuthContent({
-    isLogin,
-    setMode
-}) {
-    return (
-        <>
-            {/* Heading */}
-
-            <div className="mb-6">
-
-                <p
-                    className="
-                        text-[9px]
-                        font-semibold
-                        uppercase
-                        tracking-[0.30em]
-                        text-[#d9b996]/[0.80]
-                    "
-                >
-                    {isLogin
-                        ? "WELCOME BACK"
-                        : "CREATE ACCOUNT"}
-                </p>
-
-                <h1
-                    className="
-                        mt-2
-                        text-[27px]
-                        font-extrabold
-                        leading-none
-                        tracking-[-0.045em]
-                        text-[#fff8ef]
-
-                        sm:text-[29px]
-                    "
-                >
-                    {isLogin
-                        ? "Sign in"
-                        : "Get started"}
-                </h1>
-
-            </div>
-
-
-            {/* Form */}
-
-            <form className="space-y-4">
-
-                {!isLogin && (
-                    <Input
-                        label="Full name"
-                        name="name"
-                        placeholder="Your name"
-                    />
-                )}
-
-
-                <Input
-                    label="Email"
-                    name="email"
-                    type="email"
-                    placeholder="Your email"
-                />
-
-
-                <Input
-                    label="Password"
-                    name="password"
-                    type="password"
-                    placeholder="Your password"
-                />
-
-
-                {!isLogin && (
-                    <Input
-                        label="Confirm password"
-                        name="confirmPassword"
-                        type="password"
-                        placeholder="Confirm password"
-                    />
-                )}
-
-
-                {/* Login options */}
-
-                {isLogin && (
-                    <div
-                        className="
-                            flex
-                            items-center
-                            justify-between
-                            gap-3
-                            pt-1
-                        "
-                    >
-
-                        <label
-                            className="
-                                flex
-                                min-w-0
-                                cursor-pointer
-                                items-center
-                                gap-2
-                                text-[10px]
-                                text-[#d8bea2]/[0.76]
-                            "
-                        >
-
-                            <input
-                                type="checkbox"
-                                className="
-                                    h-3.5
-                                    w-3.5
-                                    shrink-0
-                                    accent-[#cba77f]
-                                "
-                            />
-
-                            <span>
-                                Remember me
-                            </span>
-
-                        </label>
-
-
-                        <button
-                            type="button"
-                            className="
-                                shrink-0
-                                text-[10px]
-                                text-[#d8bea2]/[0.82]
-                                transition-colors
-                                hover:text-[#fff8ef]
-                            "
-                        >
-                            Forgot password?
-                        </button>
-
-                    </div>
-                )}
-
-
-                {/* Submit */}
-
-                <Button
-                    className="
-                        mt-1
-                        h-11
-                        w-full
-                        rounded-xl
-
-                        !border
-                        !border-[#f5e5d3]/[0.28]
-
-                        !bg-[#e1cdb7]
-
-                        !text-[#2a1d15]
-
-                        font-medium
-
-                        shadow-[0_8px_25px_rgba(20,10,5,0.18)]
-
-                        transition-all
-                        duration-200
-
-                        hover:!bg-[#f0e2d2]
-
-                        active:scale-[0.99]
-                    "
-                >
-                    {isLogin
-                        ? "Sign in"
-                        : "Create account"}
-                </Button>
-
-            </form>
-
-
-            {/* Switch */}
-
-            <div
-                className="
-                    mt-5
-                    border-t
-                    border-[#dcb995]/[0.14]
-                    pt-4
-                    text-center
-                    text-[10px]
-                    text-[#d6baa0]/[0.72]
-                "
-            >
-
-                {isLogin
-                    ? "Don't have an account?"
-                    : "Already have an account?"}
-
-                <button
-                    type="button"
-                    onClick={() =>
-                        setMode(
-                            isLogin
-                                ? "signup"
-                                : "login"
-                        )
-                    }
-                    className="
-                        ml-1
-                        font-semibold
-                        text-[#fff8ef]
-                        transition-colors
-                        hover:text-[#e4c4a3]
-                    "
-                >
-                    {isLogin
-                        ? "Sign up"
-                        : "Sign in"}
-                </button>
-
-            </div>
-
-        </>
     );
 }
 

@@ -12,7 +12,6 @@ function Input({
         <div className="w-full">
 
             {/* Label */}
-
             {label && (
                 <label
                     htmlFor={name}
@@ -31,7 +30,6 @@ function Input({
 
 
             {/* Input */}
-
             <input
                 id={name}
                 name={name}
@@ -76,7 +74,6 @@ function Input({
 
 
             {/* Error */}
-
             {error && (
                 <p className="mt-1.5 text-xs text-red-300">
                     {error}
