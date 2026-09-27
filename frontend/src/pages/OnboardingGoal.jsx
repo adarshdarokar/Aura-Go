@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const goals = [
     {
@@ -29,6 +30,8 @@ const goals = [
 ];
 
 function OnboardingGoal() {
+    const navigate = useNavigate();
+
     const [selectedGoal, setSelectedGoal] = useState("");
 
     const handleNext = () => {
@@ -36,7 +39,7 @@ function OnboardingGoal() {
 
         console.log("Selected goal:", selectedGoal);
 
-        // Gender selection navigation will be added here
+        navigate("/onboarding/gender");
     };
 
     return (
@@ -50,7 +53,6 @@ function OnboardingGoal() {
                 text-[#EDEDED]
             "
         >
-            {/* Subtle ambient background */}
             <div
                 className="
                     pointer-events-none
@@ -71,38 +73,17 @@ function OnboardingGoal() {
                     overflow-y-auto
                     px-5
                     py-8
-
                     sm:px-8
                     sm:py-10
-
                     lg:px-10
                     lg:py-12
                 "
             >
-                <div
-                    className="
-                        w-full
-                        max-w-[430px]
-                    "
-                >
-                    {/* Header */}
-                    <div className="mb-9 sm:mb-10">
+                <div className="w-full max-w-[430px]">
 
-                        <div
-                            className="
-                                mb-4
-                                flex
-                                items-center
-                                gap-3
-                            "
-                        >
-                            <span
-                                className="
-                                    h-px
-                                    w-8
-                                    bg-[#626262]
-                                "
-                            />
+                    <div className="mb-9 sm:mb-10">
+                        <div className="mb-4 flex items-center gap-3">
+                            <span className="h-px w-8 bg-[#626262]" />
 
                             <p
                                 className="
@@ -137,7 +118,6 @@ function OnboardingGoal() {
                                 leading-[0.98]
                                 tracking-[-0.045em]
                                 text-[#EDEDED]
-
                                 sm:text-[34px]
                             "
                         >
@@ -158,7 +138,6 @@ function OnboardingGoal() {
                         </p>
                     </div>
 
-                    {/* Goal Options */}
                     <div className="space-y-3">
                         {goals.map((goal, index) => {
                             const isSelected =
@@ -184,7 +163,6 @@ function OnboardingGoal() {
                                         transition-all
                                         duration-300
                                         ease-out
-
                                         sm:px-5
                                         sm:py-5
 
@@ -207,7 +185,6 @@ function OnboardingGoal() {
                                         }
                                     `}
                                 >
-                                    {/* subtle selected shine */}
                                     {isSelected && (
                                         <div
                                             className="
@@ -227,7 +204,6 @@ function OnboardingGoal() {
                                             gap-4
                                         "
                                     >
-                                        {/* Number */}
                                         <div
                                             className={`
                                                 flex
@@ -262,7 +238,6 @@ function OnboardingGoal() {
                                             0{index + 1}
                                         </div>
 
-                                        {/* Text */}
                                         <div className="min-w-0 flex-1">
                                             <h2
                                                 className={`
@@ -297,7 +272,6 @@ function OnboardingGoal() {
                                             </p>
                                         </div>
 
-                                        {/* Arrow */}
                                         <div
                                             className={`
                                                 flex
@@ -336,9 +310,7 @@ function OnboardingGoal() {
                         })}
                     </div>
 
-                    {/* Bottom Action */}
                     <div className="mt-8 sm:mt-9">
-
                         <button
                             type="button"
                             disabled={!selectedGoal}
@@ -357,12 +329,9 @@ function OnboardingGoal() {
                                 shadow-[0_12px_35px_rgba(0,0,0,0.28)]
                                 transition-all
                                 duration-300
-
                                 hover:bg-[#C0C1C1]
                                 hover:shadow-[0_16px_42px_rgba(0,0,0,0.34)]
-
                                 active:scale-[0.985]
-
                                 disabled:cursor-not-allowed
                                 disabled:bg-[#626262]
                                 disabled:text-[#B4B4B4]
@@ -373,7 +342,6 @@ function OnboardingGoal() {
                             Continue
                         </button>
 
-                        {/* Progress */}
                         <div className="mt-7 flex items-center justify-center gap-2">
                             <span
                                 className="
@@ -384,32 +352,9 @@ function OnboardingGoal() {
                                 "
                             />
 
-                            <span
-                                className="
-                                    h-[3px]
-                                    w-[3px]
-                                    rounded-full
-                                    bg-[#626262]
-                                "
-                            />
-
-                            <span
-                                className="
-                                    h-[3px]
-                                    w-[3px]
-                                    rounded-full
-                                    bg-[#626262]
-                                "
-                            />
-
-                            <span
-                                className="
-                                    h-[3px]
-                                    w-[3px]
-                                    rounded-full
-                                    bg-[#626262]
-                                "
-                            />
+                            <span className="h-[3px] w-[3px] rounded-full bg-[#626262]" />
+                            <span className="h-[3px] w-[3px] rounded-full bg-[#626262]" />
+                            <span className="h-[3px] w-[3px] rounded-full bg-[#626262]" />
                         </div>
 
                         <p
