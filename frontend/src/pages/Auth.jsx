@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 import desktopBackground from "../assets/background-img.png";
@@ -10,6 +11,8 @@ const API_URL =
     import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 function Auth() {
+    const navigate = useNavigate();
+
     const [mode, setMode] = useState("login");
 
     const [formData, setFormData] = useState({
@@ -114,6 +117,8 @@ function Auth() {
                     "Login successful."
                 );
 
+                navigate("/onboarding/goal");
+
                 return;
             }
 
@@ -144,6 +149,8 @@ function Auth() {
                 response.data?.message ||
                 "Account created successfully."
             );
+
+            navigate("/onboarding/goal");
         } catch (error) {
             const message =
                 error.response?.data?.message ||
