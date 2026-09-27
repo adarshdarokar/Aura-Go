@@ -1,19 +1,24 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const genders = [
     {
         id: "male",
         title: "Male",
-        description: "Personalize your fitness journey with a masculine visual experience."
+        description:
+            "Personalize your fitness journey with a masculine visual experience."
     },
     {
         id: "female",
         title: "Female",
-        description: "Personalize your fitness journey with a feminine visual experience."
+        description:
+            "Personalize your fitness journey with a feminine visual experience."
     }
 ];
 
 function GenderSelection() {
+    const navigate = useNavigate();
+
     const [selectedGender, setSelectedGender] = useState("");
 
     const handleNext = () => {
@@ -21,7 +26,7 @@ function GenderSelection() {
 
         console.log("Selected gender:", selectedGender);
 
-        // Next onboarding step will be connected here
+        navigate("/onboarding/profile");
     };
 
     return (

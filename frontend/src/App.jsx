@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Auth from "./pages/Auth";
 import OnboardingGoal from "./pages/OnboardingGoal";
 import GenderSelection from "./pages/GenderSelection";
+import ProfileDetails from "./pages/ProfileDetails";
 
 function App() {
     return (
@@ -18,6 +19,11 @@ function App() {
                 <Route
                     path="/onboarding/gender"
                     element={<GenderSelection />}
+                />
+
+                <Route
+                    path="/onboarding/profile"
+                    element={<ProfileDetails />}
                 />
             </Routes>
         </BrowserRouter>
