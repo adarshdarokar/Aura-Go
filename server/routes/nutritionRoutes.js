@@ -5,7 +5,8 @@ const {
     getUserNutritionController,
     getNutritionByIdController,
     updateNutritionController,
-    deleteNutritionController
+    deleteNutritionController,
+    getDailyNutritionSummaryController
 } = require("../controllers/nutritionController");
 
 const protect = require("../middleware/authMiddleware");
@@ -22,6 +23,12 @@ router.get(
     "/",
     protect,
     getUserNutritionController
+);
+
+router.get(
+    "/summary",
+    protect,
+    getDailyNutritionSummaryController
 );
 
 router.get(
