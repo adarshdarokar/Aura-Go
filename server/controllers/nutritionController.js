@@ -3,7 +3,8 @@ const {
     getUserNutrition,
     getNutritionById,
     updateNutrition,
-    deleteNutrition
+    deleteNutrition,
+    getDailyNutritionSummary
 } = require("../services/nutritionService");
 
 const createNutritionController = async (req, res, next) => {
@@ -89,10 +90,33 @@ const deleteNutritionController = async (req, res, next) => {
     }
 };
 
+/* ---------- Daily Nutrition Summary ---------- */
+
+const getDailyNutritionSummaryController = async (
+    req,
+    res,
+    next
+) => {
+    try {
+        const summary = await getDailyNutritionSummary(
+            req.user.id,
+            req.query.date
+        );
+
+        return res.status(200).json({
+            success: true,
+            data: { summary }
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
     createNutritionController,
     getUserNutritionController,
     getNutritionByIdController,
     updateNutritionController,
-    deleteNutritionController
+    deleteNutritionController,
+    getDailyNutritionSummaryController
 };
