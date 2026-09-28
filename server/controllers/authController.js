@@ -17,6 +17,8 @@ const {
     clearAuthCookies
 } = require("../utils/cookie");
 
+const User = require("../models/User");
+
 /* ---------- Register ---------- */
 
 const register = async (req, res, next) => {
@@ -28,6 +30,27 @@ const register = async (req, res, next) => {
             email,
             password
         });
+
+        // Create authenticated session immediately
+        const accessToken = generateAccessToken(user._id);
+
+        const session = await createSession(user._id);
+
+        const refreshToken = generateRefreshToken(
+            user._id,
+            session._id
+        );
+
+        await attachRefreshToken(
+            session._id,
+            refreshToken
+        );
+
+        setAuthCookies(
+            res,
+            accessToken,
+            refreshToken
+        );
 
         return res.status(201).json({
             success: true,
@@ -96,11 +119,24 @@ const login = async (req, res, next) => {
 
 const me = async (req, res, next) => {
     try {
+        const user = await User.findById(req.user.id).select(
+            "_id name email"
+        );
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+
         return res.status(200).json({
             success: true,
             data: {
                 user: {
-                    id: req.user.id
+                    id: user._id,
+                    name: user.name,
+                    email: user.email
                 }
             }
         });
@@ -159,7 +195,9 @@ const logout = async (req, res, next) => {
     try {
         const refreshToken = req.cookies.refreshToken;
 
-        await logoutSession(refreshToken);
+        if (refreshToken) {
+            await logoutSession(refreshToken);
+        }
 
         clearAuthCookies(res);
 
