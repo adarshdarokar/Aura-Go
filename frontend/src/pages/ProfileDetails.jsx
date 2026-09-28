@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const experienceOptions = [
     "Beginner",
@@ -13,7 +14,9 @@ const trainingDaysOptions = [
     "6–7 days"
 ];
 
-function HeightSelection() {
+function ProfileDetails() {
+    const navigate = useNavigate();
+
     const [formData, setFormData] = useState({
         age: "",
         height: "",
@@ -54,7 +57,7 @@ function HeightSelection() {
 
         console.log("Profile details:", formData);
 
-        // Dashboard navigation will be added later
+        navigate("/dashboard");
     };
 
     const isComplete =
@@ -269,7 +272,17 @@ function HeightSelection() {
                                     "
                                 />
 
-                                <div className="flex shrink-0 rounded-[13px] border border-[#626262]/[0.34] bg-[#626262]/[0.12] p-1">
+                                <div
+                                    className="
+                                        flex
+                                        shrink-0
+                                        rounded-[13px]
+                                        border
+                                        border-[#626262]/[0.34]
+                                        bg-[#626262]/[0.12]
+                                        p-1
+                                    "
+                                >
                                     <button
                                         type="button"
                                         onClick={() =>
@@ -371,7 +384,17 @@ function HeightSelection() {
                                     "
                                 />
 
-                                <div className="flex shrink-0 rounded-[13px] border border-[#626262]/[0.34] bg-[#626262]/[0.12] p-1">
+                                <div
+                                    className="
+                                        flex
+                                        shrink-0
+                                        rounded-[13px]
+                                        border
+                                        border-[#626262]/[0.34]
+                                        bg-[#626262]/[0.12]
+                                        p-1
+                                    "
+                                >
                                     <button
                                         type="button"
                                         onClick={() =>
@@ -649,4 +672,4 @@ function CustomSelect({
     );
 }
 
-export default HeightSelection;
+export default ProfileDetails;

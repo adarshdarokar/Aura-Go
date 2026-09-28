@@ -4,13 +4,20 @@ import Auth from "./pages/Auth";
 import OnboardingGoal from "./pages/OnboardingGoal";
 import GenderSelection from "./pages/GenderSelection";
 import ProfileDetails from "./pages/ProfileDetails";
+import Dashboard from "./pages/Dashboard";
 
 function App() {
     return (
         <BrowserRouter>
             <Routes>
-                <Route path="/" element={<Auth />} />
 
+                {/* Auth */}
+                <Route
+                    path="/"
+                    element={<Auth />}
+                />
+
+                {/* Onboarding */}
                 <Route
                     path="/onboarding/goal"
                     element={<OnboardingGoal />}
@@ -25,6 +32,13 @@ function App() {
                     path="/onboarding/profile"
                     element={<ProfileDetails />}
                 />
+
+                {/* Dashboard */}
+                <Route
+                    path="/dashboard"
+                    element={<Dashboard />}
+                />
+
             </Routes>
         </BrowserRouter>
     );
