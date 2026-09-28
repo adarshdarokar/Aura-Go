@@ -1,108 +1,191 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
-
-const stats = [
-  {
-    label: "Calories",
-    value: "2,140",
-    target: "3,000",
-    unit: "kcal",
-  },
-  {
-    label: "Protein",
-    value: "108",
-    target: "140",
-    unit: "g",
-  },
-  {
-    label: "Workout",
-    value: "42",
-    target: "60",
-    unit: "min",
-  },
-];
+const API_URL =
+    import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 const quickActions = [
-  {
-    id: "workout",
-    number: "01",
-    title: "Start Workout",
-    description: "Begin today's training session.",
-  },
-  {
-    id: "nutrition",
-    number: "02",
-    title: "Log Nutrition",
-    description: "Track your meals and macros.",
-  },
-  {
-    id: "progress",
-    number: "03",
-    title: "View Progress",
-    description: "Check your latest fitness progress.",
-  },
+    {
+        id: "workout",
+        number: "01",
+        title: "Start Workout",
+        description: "Begin today's training session."
+    },
+    {
+        id: "nutrition",
+        number: "02",
+        title: "Log Nutrition",
+        description: "Track your meals and macros."
+    },
+    {
+        id: "progress",
+        number: "03",
+        title: "View Progress",
+        description: "Check your latest fitness progress."
+    }
 ];
 
-function Dashboard() {
-  const [activeTab, setActiveTab] = useState("home");
+const getTodayDate = () => {
+    const today = new Date();
 
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+    const year = today.getFullYear();
+    const month = String(
+        today.getMonth() + 1
+    ).padStart(2, "0");
+    const day = String(
+        today.getDate()
+    ).padStart(2, "0");
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        setLoading(true);
-        setError("");
+    return `${year}-${month}-${day}`;
+};
 
-        const response = await axios.get(`${API_URL}/auth/me`, {
-          withCredentials: true,
-        });
-        if (response.data?.success) {
-          setUser(response.data.data.user);
+const formatDate = () => {
+    return new Date().toLocaleDateString(
+        "en-US",
+        {
+            month: "short",
+            day: "numeric"
         }
-      } catch (error) {
-        console.error("Failed to fetch profile:", error);
+    );
+};
 
-        setError(error.response?.data?.message || "Failed to load profile");
-      } finally {
-        setLoading(false);
-      }
+function Dashboard() {
+    const [activeTab, setActiveTab] = useState("home");
+
+    const [user, setUser] = useState(null);
+
+    const [nutrition, setNutrition] = useState({
+        calories: 0,
+        protein: 0,
+        carbohydrates: 0,
+        fiber: 0,
+        totalMeals: 0
+    });
+
+    const [loading, setLoading] = useState(true);
+    const [nutritionLoading, setNutritionLoading] =
+        useState(true);
+
+    const [error, setError] = useState("");
+
+    useEffect(() => {
+        const fetchDashboardData = async () => {
+            try {
+                setLoading(true);
+                setNutritionLoading(true);
+                setError("");
+
+                const today = getTodayDate();
+
+                const [
+                    profileResponse,
+                    nutritionResponse
+                ] = await Promise.all([
+                    axios.get(
+                        `${API_URL}/auth/me`,
+                        {
+                            withCredentials: true
+                        }
+                    ),
+
+                    axios.get(
+                        `${API_URL}/nutrition/summary?date=${today}`,
+                        {
+                            withCredentials: true
+                        }
+                    )
+                ]);
+
+                if (profileResponse.data?.success) {
+                    setUser(
+                        profileResponse.data.data.user
+                    );
+                }
+
+                if (nutritionResponse.data?.success) {
+                    setNutrition(
+                        nutritionResponse.data.data.summary
+                    );
+                }
+            } catch (error) {
+                console.error(
+                    "Failed to fetch dashboard data:",
+                    error
+                );
+
+                setError(
+                    error.response?.data?.message ||
+                        "Failed to load dashboard data"
+                );
+            } finally {
+                setLoading(false);
+                setNutritionLoading(false);
+            }
+        };
+
+        fetchDashboardData();
+    }, []);
+
+    const getUserName = () => {
+        if (!user) {
+            return "there";
+        }
+
+        return (
+            user.name ||
+            user.fullName ||
+            user.username ||
+            "there"
+        );
     };
 
-    fetchProfile();
-  }, []);
+    const getInitials = () => {
+        const name = getUserName();
 
-  const getUserName = () => {
-    if (!user) {
-      return "there";
-    }
+        if (!name || name === "there") {
+            return "AD";
+        }
 
-    return user.name || user.fullName || user.username || "there";
-  };
+        const words = name.trim().split(" ");
 
-  const getInitials = () => {
-    const name = getUserName();
+        if (words.length >= 2) {
+            return (
+                words[0][0] +
+                words[words.length - 1][0]
+            ).toUpperCase();
+        }
 
-    if (!name || name === "there") {
-      return "AD";
-    }
+        return name.slice(0, 2).toUpperCase();
+    };
 
-    const words = name.trim().split(" ");
+    const stats = [
+        {
+            label: "Calories",
+            value: nutritionLoading
+                ? "..."
+                : nutrition.calories.toLocaleString(),
+            target: "3,000",
+            unit: "kcal"
+        },
+        {
+            label: "Protein",
+            value: nutritionLoading
+                ? "..."
+                : Math.round(nutrition.protein).toString(),
+            target: "140",
+            unit: "g"
+        },
+        {
+            label: "Workout",
+            value: "42",
+            target: "60",
+            unit: "min"
+        }
+    ];
 
-    if (words.length >= 2) {
-      return (words[0][0] + words[words.length - 1][0]).toUpperCase();
-    }
-
-    return name.slice(0, 2).toUpperCase();
-  };
-
-  return (
-    <main
-      className="
+    return (
+        <main
+            className="
                 relative
                 min-h-[100dvh]
                 overflow-x-hidden
@@ -110,35 +193,37 @@ function Dashboard() {
                 font-sans
                 text-[#EDEDED]
             "
-    >
-      {/* Ambient background */}
-      <div
-        className="
+        >
+            {/* Ambient background */}
+            <div
+                className="
                     pointer-events-none
                     fixed
                     inset-0
                     bg-[radial-gradient(circle_at_85%_5%,rgba(180,180,180,0.08),transparent_28%),radial-gradient(circle_at_10%_90%,rgba(98,98,98,0.08),transparent_30%)]
                 "
-      />
+            />
 
-      <div className="relative mx-auto w-full max-w-[1180px] px-5 py-6 sm:px-8 lg:px-10 lg:py-8">
-        {/* Top Bar */}
-        <header className="flex items-center justify-between">
-          <div>
-            <p
-              className="
+            <div className="relative mx-auto w-full max-w-[1180px] px-5 py-6 sm:px-8 lg:px-10 lg:py-8">
+
+                {/* Top Bar */}
+                <header className="flex items-center justify-between">
+
+                    <div>
+                        <p
+                            className="
                                 text-[8px]
                                 font-semibold
                                 uppercase
                                 tracking-[0.34em]
                                 text-[#626262]
                             "
-            >
-              AURA GO
-            </p>
+                        >
+                            AURA GO
+                        </p>
 
-            <h1
-              className="
+                        <h1
+                            className="
                                 mt-1.5
                                 text-[24px]
                                 font-semibold
@@ -146,17 +231,23 @@ function Dashboard() {
                                 text-[#EDEDED]
                                 sm:text-[28px]
                             "
-            >
-              {loading ? "Loading..." : `Good evening, ${getUserName()}.`}
-            </h1>
+                        >
+                            {loading
+                                ? "Loading..."
+                                : `Good evening, ${getUserName()}.`}
+                        </h1>
 
-            {error && <p className="mt-2 text-[8px] text-red-400">{error}</p>}
-          </div>
+                        {error && (
+                            <p className="mt-2 text-[8px] text-red-400">
+                                {error}
+                            </p>
+                        )}
+                    </div>
 
-          {/* Profile */}
-          <button
-            type="button"
-            className="
+                    {/* Profile */}
+                    <button
+                        type="button"
+                        className="
                             flex
                             h-11
                             w-11
@@ -174,14 +265,14 @@ function Dashboard() {
                             hover:border-[#B4B4B4]/[0.45]
                             hover:bg-[#626262]/[0.18]
                         "
-          >
-            {loading ? "..." : getInitials()}
-          </button>
-        </header>
+                    >
+                        {loading ? "..." : getInitials()}
+                    </button>
+                </header>
 
-        {/* Main Hero */}
-        <section
-          className="
+                {/* Main Hero */}
+                <section
+                    className="
                         relative
                         mt-7
                         overflow-hidden
@@ -193,37 +284,39 @@ function Dashboard() {
                         shadow-[0_20px_60px_rgba(0,0,0,0.25)]
                         sm:p-8
                     "
-        >
-          <div
-            className="
+                >
+                    <div
+                        className="
                             pointer-events-none
                             absolute
                             inset-0
                             bg-[linear-gradient(120deg,rgba(237,237,237,0.04),transparent_55%)]
                         "
-          />
+                    />
 
-          <div className="relative">
-            <div className="flex items-center gap-3">
-              <span className="h-px w-7 bg-[#B4B4B4]" />
+                    <div className="relative">
 
-              <p
-                className="
+                        <div className="flex items-center gap-3">
+                            <span className="h-px w-7 bg-[#B4B4B4]" />
+
+                            <p
+                                className="
                                     text-[8px]
                                     font-semibold
                                     uppercase
                                     tracking-[0.3em]
                                     text-[#B4B4B4]
                                 "
-              >
-                Today's focus
-              </p>
-            </div>
+                            >
+                                Today's focus
+                            </p>
+                        </div>
 
-            <div className="mt-6 flex flex-col justify-between gap-7 sm:flex-row sm:items-end">
-              <div>
-                <h2
-                  className="
+                        <div className="mt-6 flex flex-col justify-between gap-7 sm:flex-row sm:items-end">
+
+                            <div>
+                                <h2
+                                    className="
                                         max-w-[520px]
                                         text-[29px]
                                         font-semibold
@@ -232,29 +325,32 @@ function Dashboard() {
                                         text-[#EDEDED]
                                         sm:text-[38px]
                                     "
-                >
-                  Build consistency.
-                  <br />
-                  <span className="text-[#626262]">One day at a time.</span>
-                </h2>
+                                >
+                                    Build consistency.
+                                    <br />
 
-                <p
-                  className="
+                                    <span className="text-[#626262]">
+                                        One day at a time.
+                                    </span>
+                                </h2>
+
+                                <p
+                                    className="
                                         mt-4
                                         max-w-[430px]
                                         text-[10px]
                                         leading-[1.7]
                                         text-[#B4B4B4]
                                     "
-                >
-                  Stay on track with your training, nutrition and recovery
-                  today.
-                </p>
-              </div>
+                                >
+                                    Stay on track with your training,
+                                    nutrition and recovery today.
+                                </p>
+                            </div>
 
-              <button
-                type="button"
-                className="
+                            <button
+                                type="button"
+                                className="
                                     h-[48px]
                                     shrink-0
                                     rounded-[14px]
@@ -269,67 +365,84 @@ function Dashboard() {
                                     hover:bg-[#C0C1C1]
                                     active:scale-[0.98]
                                 "
-              >
-                Start Workout →
-              </button>
-            </div>
-          </div>
-        </section>
+                            >
+                                Start Workout →
+                            </button>
+                        </div>
+                    </div>
+                </section>
 
-        {/* Daily Overview */}
-        <section className="mt-7">
-          <div className="mb-4 flex items-end justify-between">
-            <div>
-              <p
-                className="
+                {/* Daily Overview */}
+                <section className="mt-7">
+
+                    <div className="mb-4 flex items-end justify-between">
+
+                        <div>
+                            <p
+                                className="
                                     text-[8px]
                                     font-semibold
                                     uppercase
                                     tracking-[0.28em]
                                     text-[#626262]
                                 "
-              >
-                Daily overview
-              </p>
+                            >
+                                Daily overview
+                            </p>
 
-              <h2
-                className="
+                            <h2
+                                className="
                                     mt-1.5
                                     text-[17px]
                                     font-semibold
                                     tracking-[-0.025em]
                                     text-[#EDEDED]
                                 "
-              >
-                Today's activity
-              </h2>
-            </div>
+                            >
+                                Today's activity
+                            </h2>
+                        </div>
 
-            <span
-              className="
+                        <span
+                            className="
                                 text-[8px]
                                 uppercase
                                 tracking-[0.18em]
                                 text-[#626262]
                             "
-            >
-              Sep 28
-            </span>
-          </div>
+                        >
+                            {formatDate()}
+                        </span>
+                    </div>
 
-          <div className="grid gap-3 sm:grid-cols-3">
-            {stats.map((stat) => {
-              const percentage = Math.min(
-                (Number(stat.value.replace(",", "")) /
-                  Number(stat.target.replace(",", ""))) *
-                  100,
-                100,
-              );
+                    <div className="grid gap-3 sm:grid-cols-3">
 
-              return (
-                <div
-                  key={stat.label}
-                  className="
+                        {stats.map((stat) => {
+
+                            const numericValue =
+                                Number(
+                                    String(
+                                        stat.value
+                                    ).replace(",", "")
+                                ) || 0;
+
+                            const numericTarget =
+                                Number(
+                                    stat.target.replace(",", "")
+                                );
+
+                            const percentage =
+                                Math.min(
+                                    (numericValue /
+                                        numericTarget) *
+                                        100,
+                                    100
+                                );
+
+                            return (
+                                <div
+                                    key={stat.label}
+                                    className="
                                         rounded-[19px]
                                         border
                                         border-[#626262]/[0.28]
@@ -340,96 +453,105 @@ function Dashboard() {
                                         hover:border-[#B4B4B4]/[0.30]
                                         hover:bg-[#626262]/[0.14]
                                     "
-                >
-                  <div className="flex items-center justify-between">
-                    <p
-                      className="
+                                >
+
+                                    <div className="flex items-center justify-between">
+
+                                        <p
+                                            className="
                                                 text-[8px]
                                                 font-semibold
                                                 uppercase
                                                 tracking-[0.22em]
                                                 text-[#626262]
                                             "
-                    >
-                      {stat.label}
-                    </p>
+                                        >
+                                            {stat.label}
+                                        </p>
 
-                    <span className="text-[8px] text-[#626262]">
-                      {stat.target} {stat.unit}
-                    </span>
-                  </div>
+                                        <span className="text-[8px] text-[#626262]">
+                                            {stat.target} {stat.unit}
+                                        </span>
+                                    </div>
 
-                  <div className="mt-4 flex items-end gap-1.5">
-                    <span
-                      className="
+                                    <div className="mt-4 flex items-end gap-1.5">
+
+                                        <span
+                                            className="
                                                 text-[26px]
                                                 font-semibold
                                                 tracking-[-0.04em]
                                                 text-[#EDEDED]
                                             "
-                    >
-                      {stat.value}
-                    </span>
+                                        >
+                                            {stat.value}
+                                        </span>
 
-                    <span className="mb-1 text-[8px] uppercase text-[#626262]">
-                      {stat.unit}
-                    </span>
-                  </div>
+                                        <span className="mb-1 text-[8px] uppercase text-[#626262]">
+                                            {stat.unit}
+                                        </span>
+                                    </div>
 
-                  <div className="mt-4 h-[4px] overflow-hidden rounded-full bg-[#626262]/[0.18]">
-                    <div
-                      className="
+                                    <div className="mt-4 h-[4px] overflow-hidden rounded-full bg-[#626262]/[0.18]">
+
+                                        <div
+                                            className="
                                                 h-full
                                                 rounded-full
                                                 bg-[#B4B4B4]
                                                 transition-all
                                                 duration-700
                                             "
-                      style={{
-                        width: `${percentage}%`,
-                      }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
+                                            style={{
+                                                width: `${percentage}%`
+                                            }}
+                                        />
 
-        {/* Quick Actions */}
-        <section className="mt-8">
-          <div className="mb-4">
-            <p
-              className="
+                                    </div>
+                                </div>
+                            );
+                        })}
+
+                    </div>
+                </section>
+
+                {/* Quick Actions */}
+                <section className="mt-8">
+
+                    <div className="mb-4">
+
+                        <p
+                            className="
                                 text-[8px]
                                 font-semibold
                                 uppercase
                                 tracking-[0.28em]
                                 text-[#626262]
                             "
-            >
-              Quick actions
-            </p>
+                        >
+                            Quick actions
+                        </p>
 
-            <h2
-              className="
+                        <h2
+                            className="
                                 mt-1.5
                                 text-[17px]
                                 font-semibold
                                 tracking-[-0.025em]
                                 text-[#EDEDED]
                             "
-            >
-              Keep moving
-            </h2>
-          </div>
+                        >
+                            Keep moving
+                        </h2>
+                    </div>
 
-          <div className="grid gap-3 md:grid-cols-3">
-            {quickActions.map((action) => (
-              <button
-                key={action.id}
-                type="button"
-                className="
+                    <div className="grid gap-3 md:grid-cols-3">
+
+                        {quickActions.map((action) => (
+                            <button
+                                key={action.id}
+                                type="button"
+                                className="
                                     group
                                     rounded-[19px]
                                     border
@@ -443,10 +565,12 @@ function Dashboard() {
                                     hover:border-[#B4B4B4]/[0.35]
                                     hover:bg-[#626262]/[0.14]
                                 "
-              >
-                <div className="flex items-center justify-between">
-                  <span
-                    className="
+                            >
+
+                                <div className="flex items-center justify-between">
+
+                                    <span
+                                        className="
                                             flex
                                             h-9
                                             w-9
@@ -461,12 +585,12 @@ function Dashboard() {
                                             tracking-[0.08em]
                                             text-[#B4B4B4]
                                         "
-                  >
-                    {action.number}
-                  </span>
+                                    >
+                                        {action.number}
+                                    </span>
 
-                  <span
-                    className="
+                                    <span
+                                        className="
                                             text-[15px]
                                             text-[#626262]
                                             transition-all
@@ -474,40 +598,42 @@ function Dashboard() {
                                             group-hover:translate-x-1
                                             group-hover:text-[#B4B4B4]
                                         "
-                  >
-                    →
-                  </span>
-                </div>
+                                    >
+                                        →
+                                    </span>
+                                </div>
 
-                <h3
-                  className="
+                                <h3
+                                    className="
                                         mt-5
                                         text-[13px]
                                         font-semibold
                                         text-[#EDEDED]
                                     "
-                >
-                  {action.title}
-                </h3>
+                                >
+                                    {action.title}
+                                </h3>
 
-                <p
-                  className="
+                                <p
+                                    className="
                                         mt-1.5
                                         text-[9px]
                                         leading-[1.6]
                                         text-[#626262]
                                     "
-                >
-                  {action.description}
-                </p>
-              </button>
-            ))}
-          </div>
-        </section>
+                                >
+                                    {action.description}
+                                </p>
 
-        {/* Bottom Navigation */}
-        <nav
-          className="
+                            </button>
+                        ))}
+
+                    </div>
+                </section>
+
+                {/* Bottom Navigation */}
+                <nav
+                    className="
                         mt-9
                         flex
                         items-center
@@ -519,21 +645,25 @@ function Dashboard() {
                         bg-[#626262]/[0.08]
                         p-1.5
                     "
-        >
-          {[
-            ["home", "Home"],
-            ["workout", "Workout"],
-            ["nutrition", "Nutrition"],
-            ["progress", "Progress"],
-          ].map(([id, label]) => {
-            const isActive = activeTab === id;
+                >
+                    {[
+                        ["home", "Home"],
+                        ["workout", "Workout"],
+                        ["nutrition", "Nutrition"],
+                        ["progress", "Progress"]
+                    ].map(([id, label]) => {
 
-            return (
-              <button
-                key={id}
-                type="button"
-                onClick={() => setActiveTab(id)}
-                className={`
+                        const isActive =
+                            activeTab === id;
+
+                        return (
+                            <button
+                                key={id}
+                                type="button"
+                                onClick={() =>
+                                    setActiveTab(id)
+                                }
+                                className={`
                                     flex
                                     h-10
                                     flex-1
@@ -548,20 +678,20 @@ function Dashboard() {
                                     duration-300
 
                                     ${
-                                      isActive
-                                        ? "bg-[#EDEDED] text-[#0E0E0E]"
-                                        : "text-[#626262] hover:text-[#B4B4B4]"
+                                        isActive
+                                            ? "bg-[#EDEDED] text-[#0E0E0E]"
+                                            : "text-[#626262] hover:text-[#B4B4B4]"
                                     }
                                 `}
-              >
-                {label}
-              </button>
-            );
-          })}
-        </nav>
+                            >
+                                {label}
+                            </button>
+                        );
+                    })}
+                </nav>
 
-        <p
-          className="
+                <p
+                    className="
                         mt-5
                         pb-3
                         text-center
@@ -570,12 +700,13 @@ function Dashboard() {
                         tracking-[0.28em]
                         text-[#626262]
                     "
-        >
-          AURA GO • Your journey starts here
-        </p>
-      </div>
-    </main>
-  );
+                >
+                    AURA GO • Your journey starts here
+                </p>
+
+            </div>
+        </main>
+    );
 }
 
 export default Dashboard;
