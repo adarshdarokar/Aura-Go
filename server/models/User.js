@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+
 const bcrypt = require("bcryptjs");
 
 const userSchema = new mongoose.Schema(
@@ -51,7 +52,7 @@ const userSchema = new mongoose.Schema(
 
         fitnessLevel: {
             type: String,
-            enum: ["beginner", "intermediate", "pro"]
+            enum: ["beginner", "intermediate", "advanced"]
         },
 
         goal: {

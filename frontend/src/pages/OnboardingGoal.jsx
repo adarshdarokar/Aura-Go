@@ -2,49 +2,48 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const goals = [
-    {
-        id: "build-muscle",
-        title: "Build Muscle",
-        description: "Gain muscle and build a stronger physique."
-    },
-    {
-        id: "get-stronger",
-        title: "Get Stronger",
-        description: "Increase strength and improve performance."
-    },
-    {
-        id: "lose-fat",
-        title: "Lose Fat",
-        description: "Reduce body fat while staying strong."
-    },
-    {
-        id: "improve-endurance",
-        title: "Improve Endurance",
-        description: "Build stamina and perform better for longer."
-    },
-    {
-        id: "stay-healthy",
-        title: "Stay Healthy",
-        description: "Maintain fitness and feel better every day."
-    }
+  {
+    id: "build-muscle",
+    title: "Build Muscle",
+    description: "Gain muscle and build a stronger physique.",
+  },
+  {
+    id: "get-stronger",
+    title: "Get Stronger",
+    description: "Increase strength and improve performance.",
+  },
+  {
+    id: "lose-fat",
+    title: "Lose Fat",
+    description: "Reduce body fat while staying strong.",
+  },
+  {
+    id: "improve-endurance",
+    title: "Improve Endurance",
+    description: "Build stamina and perform better for longer.",
+  },
+  {
+    id: "stay-healthy",
+    title: "Stay Healthy",
+    description: "Maintain fitness and feel better every day.",
+  },
 ];
 
 function OnboardingGoal() {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    const [selectedGoal, setSelectedGoal] = useState("");
+  const [selectedGoal, setSelectedGoal] = useState("");
+  const handleNext = () => {
+    if (!selectedGoal) return;
 
-    const handleNext = () => {
-        if (!selectedGoal) return;
+    sessionStorage.setItem("auraGoal", selectedGoal);
 
-        console.log("Selected goal:", selectedGoal);
+    navigate("/onboarding/gender");
+  };
 
-        navigate("/onboarding/gender");
-    };
-
-    return (
-        <main
-            className="
+  return (
+    <main
+      className="
                 relative
                 h-[100dvh]
                 overflow-hidden
@@ -52,18 +51,18 @@ function OnboardingGoal() {
                 font-sans
                 text-[#EDEDED]
             "
-        >
-            <div
-                className="
+    >
+      <div
+        className="
                     pointer-events-none
                     absolute
                     inset-0
                     bg-[radial-gradient(circle_at_50%_20%,rgba(180,180,180,0.07),transparent_38%),radial-gradient(circle_at_50%_100%,rgba(98,98,98,0.08),transparent_42%)]
                 "
-            />
+      />
 
-            <section
-                className="
+      <section
+        className="
                     relative
                     flex
                     h-full
@@ -78,40 +77,39 @@ function OnboardingGoal() {
                     lg:px-10
                     lg:py-12
                 "
-            >
-                <div className="w-full max-w-[430px]">
+      >
+        <div className="w-full max-w-[430px]">
+          <div className="mb-9 sm:mb-10">
+            <div className="mb-4 flex items-center gap-3">
+              <span className="h-px w-8 bg-[#626262]" />
 
-                    <div className="mb-9 sm:mb-10">
-                        <div className="mb-4 flex items-center gap-3">
-                            <span className="h-px w-8 bg-[#626262]" />
-
-                            <p
-                                className="
+              <p
+                className="
                                     text-[9px]
                                     font-medium
                                     uppercase
                                     tracking-[0.34em]
                                     text-[#B4B4B4]
                                 "
-                            >
-                                Step 01
-                            </p>
-                        </div>
+              >
+                Step 01
+              </p>
+            </div>
 
-                        <p
-                            className="
+            <p
+              className="
                                 text-[9px]
                                 font-semibold
                                 uppercase
                                 tracking-[0.28em]
                                 text-[#626262]
                             "
-                        >
-                            PERSONALIZE YOUR JOURNEY
-                        </p>
+            >
+              PERSONALIZE YOUR JOURNEY
+            </p>
 
-                        <h1
-                            className="
+            <h1
+              className="
                                 mt-3
                                 text-[30px]
                                 font-semibold
@@ -120,37 +118,33 @@ function OnboardingGoal() {
                                 text-[#EDEDED]
                                 sm:text-[34px]
                             "
-                        >
-                            What's your goal?
-                        </h1>
+            >
+              What's your goal?
+            </h1>
 
-                        <p
-                            className="
+            <p
+              className="
                                 mt-4
                                 max-w-[340px]
                                 text-[11px]
                                 leading-[1.7]
                                 text-[#B4B4B4]
                             "
-                        >
-                            Choose the direction that best describes
-                            what you want to achieve.
-                        </p>
-                    </div>
+            >
+              Choose the direction that best describes what you want to achieve.
+            </p>
+          </div>
 
-                    <div className="space-y-3">
-                        {goals.map((goal, index) => {
-                            const isSelected =
-                                selectedGoal === goal.id;
+          <div className="space-y-3">
+            {goals.map((goal, index) => {
+              const isSelected = selectedGoal === goal.id;
 
-                            return (
-                                <button
-                                    key={goal.id}
-                                    type="button"
-                                    onClick={() =>
-                                        setSelectedGoal(goal.id)
-                                    }
-                                    className={`
+              return (
+                <button
+                  key={goal.id}
+                  type="button"
+                  onClick={() => setSelectedGoal(goal.id)}
+                  className={`
                                         group
                                         relative
                                         w-full
@@ -167,14 +161,14 @@ function OnboardingGoal() {
                                         sm:py-5
 
                                         ${
-                                            isSelected
-                                                ? `
+                                          isSelected
+                                            ? `
                                                     border-[#EDEDED]/[0.65]
                                                     bg-[#EDEDED]
                                                     text-[#0E0E0E]
                                                     shadow-[0_16px_45px_rgba(0,0,0,0.38)]
                                                   `
-                                                : `
+                                            : `
                                                     border-[#626262]/[0.34]
                                                     bg-[#626262]/[0.12]
                                                     text-[#EDEDED]
@@ -184,28 +178,28 @@ function OnboardingGoal() {
                                                   `
                                         }
                                     `}
-                                >
-                                    {isSelected && (
-                                        <div
-                                            className="
+                >
+                  {isSelected && (
+                    <div
+                      className="
                                                 pointer-events-none
                                                 absolute
                                                 inset-0
                                                 bg-[linear-gradient(110deg,transparent_25%,rgba(255,255,255,0.22),transparent_70%)]
                                             "
-                                        />
-                                    )}
+                    />
+                  )}
 
-                                    <div
-                                        className="
+                  <div
+                    className="
                                             relative
                                             flex
                                             items-center
                                             gap-4
                                         "
-                                    >
-                                        <div
-                                            className={`
+                  >
+                    <div
+                      className={`
                                                 flex
                                                 h-10
                                                 w-10
@@ -221,59 +215,59 @@ function OnboardingGoal() {
                                                 duration-300
 
                                                 ${
-                                                    isSelected
-                                                        ? `
+                                                  isSelected
+                                                    ? `
                                                             border-[#0E0E0E]/[0.12]
                                                             bg-[#0E0E0E]/[0.06]
                                                             text-[#0E0E0E]
                                                           `
-                                                        : `
+                                                    : `
                                                             border-[#626262]/[0.30]
                                                             bg-[#0E0E0E]/[0.28]
                                                             text-[#B4B4B4]
                                                           `
                                                 }
                                             `}
-                                        >
-                                            0{index + 1}
-                                        </div>
+                    >
+                      0{index + 1}
+                    </div>
 
-                                        <div className="min-w-0 flex-1">
-                                            <h2
-                                                className={`
+                    <div className="min-w-0 flex-1">
+                      <h2
+                        className={`
                                                     text-[13px]
                                                     font-semibold
                                                     tracking-[-0.01em]
 
                                                     ${
-                                                        isSelected
-                                                            ? "text-[#0E0E0E]"
-                                                            : "text-[#EDEDED]"
+                                                      isSelected
+                                                        ? "text-[#0E0E0E]"
+                                                        : "text-[#EDEDED]"
                                                     }
                                                 `}
-                                            >
-                                                {goal.title}
-                                            </h2>
+                      >
+                        {goal.title}
+                      </h2>
 
-                                            <p
-                                                className={`
+                      <p
+                        className={`
                                                     mt-1
                                                     text-[9px]
                                                     leading-[1.6]
 
                                                     ${
-                                                        isSelected
-                                                            ? "text-[#0E0E0E]/[0.58]"
-                                                            : "text-[#B4B4B4]"
+                                                      isSelected
+                                                        ? "text-[#0E0E0E]/[0.58]"
+                                                        : "text-[#B4B4B4]"
                                                     }
                                                 `}
-                                            >
-                                                {goal.description}
-                                            </p>
-                                        </div>
+                      >
+                        {goal.description}
+                      </p>
+                    </div>
 
-                                        <div
-                                            className={`
+                    <div
+                      className={`
                                                 flex
                                                 h-8
                                                 w-8
@@ -287,13 +281,13 @@ function OnboardingGoal() {
                                                 duration-300
 
                                                 ${
-                                                    isSelected
-                                                        ? `
+                                                  isSelected
+                                                    ? `
                                                             translate-x-0
                                                             border-[#0E0E0E]/[0.12]
                                                             text-[#0E0E0E]
                                                           `
-                                                        : `
+                                                    : `
                                                             border-[#626262]/[0.22]
                                                             text-[#626262]
                                                             group-hover:translate-x-1
@@ -301,21 +295,21 @@ function OnboardingGoal() {
                                                           `
                                                 }
                                             `}
-                                        >
-                                            →
-                                        </div>
-                                    </div>
-                                </button>
-                            );
-                        })}
+                    >
+                      →
                     </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
 
-                    <div className="mt-8 sm:mt-9">
-                        <button
-                            type="button"
-                            disabled={!selectedGoal}
-                            onClick={handleNext}
-                            className="
+          <div className="mt-8 sm:mt-9">
+            <button
+              type="button"
+              disabled={!selectedGoal}
+              onClick={handleNext}
+              className="
                                 h-[50px]
                                 w-full
                                 rounded-[15px]
@@ -338,27 +332,27 @@ function OnboardingGoal() {
                                 disabled:opacity-45
                                 disabled:shadow-none
                             "
-                        >
-                            Continue
-                        </button>
+            >
+              Continue
+            </button>
 
-                        <div className="mt-7 flex items-center justify-center gap-2">
-                            <span
-                                className="
+            <div className="mt-7 flex items-center justify-center gap-2">
+              <span
+                className="
                                     h-[3px]
                                     w-7
                                     rounded-full
                                     bg-[#EDEDED]
                                 "
-                            />
+              />
 
-                            <span className="h-[3px] w-[3px] rounded-full bg-[#626262]" />
-                            <span className="h-[3px] w-[3px] rounded-full bg-[#626262]" />
-                            <span className="h-[3px] w-[3px] rounded-full bg-[#626262]" />
-                        </div>
+              <span className="h-[3px] w-[3px] rounded-full bg-[#626262]" />
+              <span className="h-[3px] w-[3px] rounded-full bg-[#626262]" />
+              <span className="h-[3px] w-[3px] rounded-full bg-[#626262]" />
+            </div>
 
-                        <p
-                            className="
+            <p
+              className="
                                 mt-4
                                 text-center
                                 text-[8px]
@@ -366,14 +360,14 @@ function OnboardingGoal() {
                                 tracking-[0.24em]
                                 text-[#626262]
                             "
-                        >
-                            Your journey starts here
-                        </p>
-                    </div>
-                </div>
-            </section>
-        </main>
-    );
+            >
+              Your journey starts here
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+  );
 }
 
 export default OnboardingGoal;
