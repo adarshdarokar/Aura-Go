@@ -5,43 +5,28 @@ import OnboardingGoal from "./pages/OnboardingGoal";
 import GenderSelection from "./pages/GenderSelection";
 import ProfileDetails from "./pages/ProfileDetails";
 import Dashboard from "./pages/Dashboard";
+import Nutrition from "./pages/Nutrition";
 
 function App() {
-    return (
-        <BrowserRouter>
-            <Routes>
+  return (
+    <BrowserRouter>
+      <Routes>
+        {/* Auth */}
+        <Route path="/" element={<Auth />} />
 
-                {/* Auth */}
-                <Route
-                    path="/"
-                    element={<Auth />}
-                />
+        {/* Onboarding */}
+        <Route path="/onboarding/goal" element={<OnboardingGoal />} />
 
-                {/* Onboarding */}
-                <Route
-                    path="/onboarding/goal"
-                    element={<OnboardingGoal />}
-                />
+        <Route path="/onboarding/gender" element={<GenderSelection />} />
 
-                <Route
-                    path="/onboarding/gender"
-                    element={<GenderSelection />}
-                />
+        <Route path="/onboarding/profile" element={<ProfileDetails />} />
 
-                <Route
-                    path="/onboarding/profile"
-                    element={<ProfileDetails />}
-                />
-
-                {/* Dashboard */}
-                <Route
-                    path="/dashboard"
-                    element={<Dashboard />}
-                />
-
-            </Routes>
-        </BrowserRouter>
-    );
+        {/* Dashboard */}
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/nutrition" element={<Nutrition />} />
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
 export default App;
