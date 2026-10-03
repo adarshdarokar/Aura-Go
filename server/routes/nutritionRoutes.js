@@ -9,6 +9,10 @@ const {
     getDailyNutritionSummaryController
 } = require("../controllers/nutritionController");
 
+const {
+    getNutritionTargets
+} = require("../controllers/nutritionTargetController");
+
 const protect = require("../middleware/authMiddleware");
 
 const router = express.Router();
@@ -29,6 +33,12 @@ router.get(
     "/summary",
     protect,
     getDailyNutritionSummaryController
+);
+
+router.get(
+    "/targets",
+    protect,
+    getNutritionTargets
 );
 
 router.get(
