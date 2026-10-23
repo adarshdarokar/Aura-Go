@@ -1,521 +1,608 @@
-import { useState } from "react";
+
+import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 
-const API_URL =
-    import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
-const mealTypes = [
-    "breakfast",
-    "lunch",
-    "dinner",
-    "snack"
-];
+const mealTypes = ["breakfast", "lunch", "dinner", "snack"];
+
+const emptyForm = {
+  mealType: "breakfast",
+  mealName: "",
+  calories: "",
+  protein: "",
+  carbohydrates: "",
+  fiber: "",
+};
+
+const inputClass =
+  "h-12 w-full rounded-xl border border-[#626262]/30 bg-[#171717] px-4 text-sm text-[#EDEDED] outline-none focus:border-[#B4B4B4]/60";
+
+const labelClass =
+  "mb-2 block text-[10px] font-semibold uppercase tracking-[0.2em] text-[#858585]";
 
 function Nutrition() {
-    const [formData, setFormData] = useState({
-        mealType: "",
-        mealName: "",
-        calories: "",
-        protein: "",
-        carbohydrates: "",
-        fiber: ""
-    });
+  const [foods, setFoods] = useState([]);
+  const [search, setSearch] = useState("");
+  const [selectedFood, setSelectedFood] = useState(null);
+  const [quantity, setQuantity] = useState("100");
+  const [mealType, setMealType] = useState("breakfast");
+  const [nutrition, setNutrition] = useState(null);
+  const [summary, setSummary] = useState(null);
+  const [targets, setTargets] = useState(null);
+  const [todayMeals, setTodayMeals] = useState([]);
+  const [manual, setManual] = useState(false);
+  const [formData, setFormData] = useState(emptyForm);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
-    const [success, setSuccess] = useState("");
+  const today = new Date().toLocaleDateString("en-CA", {
+    timeZone: "Asia/Kolkata",
+  });
 
-    const handleChange = (field, value) => {
-        setFormData((previous) => ({
-            ...previous,
-            [field]: value
-        }));
+  const requestConfig = { withCredentials: true };
 
-        setError("");
-        setSuccess("");
-    };
+  const loadDashboard = useCallback(async () => {
+    try {
+      const [summaryResponse, targetsResponse, mealsResponse] =
+        await Promise.all([
+          axios.get(
+            `${API_URL}/nutrition/summary?date=${today}`,
+            requestConfig
+          ),
+          axios.get(`${API_URL}/nutrition/targets`, requestConfig),
+          axios.get(
+            `${API_URL}/nutrition?date=${today}`,
+            requestConfig
+          ),
+        ]);
 
-    const handleSubmit = async (event) => {
-        event.preventDefault();
+      setSummary(summaryResponse.data.data.summary);
+      setTargets(targetsResponse.data.data.targets);
+      setTodayMeals(mealsResponse.data.data.nutrition);
+    } catch (err) {
+      console.error("Nutrition dashboard error:", err);
+      setError(
+        err.response?.data?.message ||
+          "Could not load nutrition data. Please log in again if needed."
+      );
+    }
+  }, [today]);
 
-        setError("");
-        setSuccess("");
+  useEffect(() => {
+    loadDashboard();
+  }, [loadDashboard]);
 
-        const {
-            mealType,
-            mealName,
-            calories,
-            protein,
-            carbohydrates,
-            fiber
-        } = formData;
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      if (!search.trim()) {
+        setFoods([]);
+        return;
+      }
 
-        if (
-            !mealType ||
-            !mealName ||
-            !calories ||
-            !protein ||
-            !carbohydrates ||
-            !fiber
-        ) {
-            setError("Please fill all fields.");
-            return;
+      try {
+        setLoading(true);
+        const response = await axios.get(
+          `${API_URL}/foods?q=${encodeURIComponent(search.trim())}&limit=20`
+        );
+        setFoods(response.data.data.foods || []);
+      } catch (err) {
+        console.error("Food search error:", err);
+        setError(err.response?.data?.message || "Food search failed.");
+      } finally {
+        setLoading(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  const calculateFood = async () => {
+    if (!selectedFood) {
+      setError("Select a food first.");
+      return;
+    }
+
+    if (!quantity || Number(quantity) <= 0) {
+      setError("Enter a quantity greater than zero.");
+      return;
+    }
+
+    try {
+      setError("");
+      setSuccess("");
+      setLoading(true);
+
+      const response = await axios.post(
+        `${API_URL}/foods/calculate`,
+        {
+          foodId: selectedFood._id,
+          quantity: Number(quantity),
         }
+      );
 
-        try {
-            setLoading(true);
+      setNutrition(response.data.data.nutrition);
+    } catch (err) {
+      setError(
+        err.response?.data?.message || "Could not calculate nutrition."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
-            await axios.post(
-                `${API_URL}/nutrition`,
-                {
-                    date: new Date().toISOString(),
-                    mealType,
-                    mealName: mealName.trim(),
-                    calories: Number(calories),
-                    protein: Number(protein),
-                    carbohydrates: Number(carbohydrates),
-                    fiber: Number(fiber)
-                },
-                {
-                    withCredentials: true
-                }
-            );
+  const addSelectedFood = async () => {
+    if (!selectedFood || !nutrition) {
+      setError("Select a food and calculate its nutrition first.");
+      return;
+    }
 
-            setSuccess(
-                "Meal added successfully."
-            );
+    try {
+      setSaving(true);
+      setError("");
+      setSuccess("");
 
-            setFormData({
-                mealType: "",
-                mealName: "",
-                calories: "",
-                protein: "",
-                carbohydrates: "",
-                fiber: ""
-            });
-        } catch (error) {
-            console.error(
-                "Failed to add nutrition:",
-                error
-            );
+      await axios.post(
+        `${API_URL}/nutrition/food`,
+        {
+          foodId: selectedFood._id,
+          quantity: Number(quantity),
+          mealType,
+          date: today,
+        },
+        requestConfig
+      );
 
-            setError(
-                error.response?.data?.message ||
-                    "Failed to add meal."
-            );
-        } finally {
-            setLoading(false);
-        }
-    };
+      setSuccess("Food added to today's nutrition log.");
+      setSearch("");
+      setFoods([]);
+      setSelectedFood(null);
+      setNutrition(null);
+      setQuantity("100");
 
-    return (
-        <main
-            className="
-                min-h-[100dvh]
-                bg-[#0E0E0E]
-                px-5
-                py-6
-                font-sans
-                text-[#EDEDED]
-                sm:px-8
-                lg:px-10
-                lg:py-8
-            "
-        >
-            <div className="mx-auto w-full max-w-[720px]">
+      await loadDashboard();
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to add food.");
+    } finally {
+      setSaving(false);
+    }
+  };
 
-                {/* Header */}
-                <div className="mb-8">
+  const updateManualField = (field, value) => {
+    setFormData((previous) => ({ ...previous, [field]: value }));
+  };
 
-                    <p
-                        className="
-                            text-[8px]
-                            font-semibold
-                            uppercase
-                            tracking-[0.34em]
-                            text-[#626262]
-                        "
-                    >
-                        AURA GO
-                    </p>
+  const addManualMeal = async (event) => {
+    event.preventDefault();
 
-                    <h1
-                        className="
-                            mt-2
-                            text-[30px]
-                            font-semibold
-                            tracking-[-0.045em]
-                            text-[#EDEDED]
-                            sm:text-[36px]
-                        "
-                    >
-                        Nutrition
-                    </h1>
+    const { mealType: type, mealName, calories, protein, carbohydrates, fiber } =
+      formData;
 
-                    <p
-                        className="
-                            mt-2
-                            max-w-[420px]
-                            text-[10px]
-                            leading-[1.7]
-                            text-[#626262]
-                        "
-                    >
-                        Track your meals and keep your
-                        daily nutrition on target.
-                    </p>
-                </div>
+    if (
+      !type ||
+      !mealName.trim() ||
+      [calories, protein, carbohydrates, fiber].some(
+        (value) => value === "" || !Number.isFinite(Number(value)) || Number(value) < 0
+      )
+    ) {
+      setError("Fill all fields with valid non-negative numbers.");
+      return;
+    }
 
-                {/* Form Card */}
-                <section
-                    className="
-                        rounded-[24px]
-                        border
-                        border-[#626262]/[0.28]
-                        bg-[#626262]/[0.08]
-                        p-5
-                        shadow-[0_20px_60px_rgba(0,0,0,0.22)]
-                        sm:p-7
-                    "
-                >
+    try {
+      setSaving(true);
+      setError("");
+      setSuccess("");
 
-                    <div className="mb-6">
-                        <p
-                            className="
-                                text-[8px]
-                                font-semibold
-                                uppercase
-                                tracking-[0.28em]
-                                text-[#626262]
-                            "
-                        >
-                            Add nutrition
-                        </p>
+      await axios.post(
+        `${API_URL}/nutrition`,
+        {
+          date: new Date(`${today}T12:00:00+05:30`).toISOString(),
+          mealType: type,
+          mealName: mealName.trim(),
+          calories: Number(calories),
+          protein: Number(protein),
+          carbohydrates: Number(carbohydrates),
+          fiber: Number(fiber),
+        },
+        requestConfig
+      );
 
-                        <h2
-                            className="
-                                mt-1.5
-                                text-[18px]
-                                font-semibold
-                                tracking-[-0.025em]
-                                text-[#EDEDED]
-                            "
-                        >
-                            Log a meal
-                        </h2>
-                    </div>
+      setSuccess("Meal saved successfully.");
+      setFormData(emptyForm);
+      await loadDashboard();
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to save meal.");
+    } finally {
+      setSaving(false);
+    }
+  };
 
-                    <form
-                        onSubmit={handleSubmit}
-                        className="space-y-4"
-                    >
+  const remaining = (target, consumed) =>
+    Math.round((Number(target || 0) - Number(consumed || 0)) * 10) / 10;
 
-                        {/* Meal Type */}
-                        <div>
-                            <label
-                                className="
-                                    mb-1.5
-                                    block
-                                    text-[8px]
-                                    font-semibold
-                                    uppercase
-                                    tracking-[0.22em]
-                                    text-[#626262]
-                                "
-                            >
-                                Meal Type
-                            </label>
+  return (
+    <main className="min-h-screen bg-[#0E0E0E] px-5 py-7 text-[#EDEDED] sm:px-8 lg:px-10">
+      <div className="mx-auto max-w-5xl">
+        <header className="mb-8">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[#777]">
+            AURA GO / DAILY TRACKER
+          </p>
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
+            Nutrition
+          </h1>
+          <p className="mt-2 text-sm text-[#858585]">
+            Track your food, macros and daily targets.
+          </p>
+        </header>
 
-                            <select
-                                value={formData.mealType}
-                                onChange={(event) =>
-                                    handleChange(
-                                        "mealType",
-                                        event.target.value
-                                    )
-                                }
-                                className="
-                                    h-[48px]
-                                    w-full
-                                    rounded-[13px]
-                                    border
-                                    border-[#626262]/[0.34]
-                                    bg-[#171717]
-                                    px-4
-                                    text-[11px]
-                                    font-medium
-                                    text-[#EDEDED]
-                                    outline-none
-                                    transition-all
-                                    focus:border-[#B4B4B4]/[0.55]
-                                "
-                            >
-                                <option value="">
-                                    Select meal type
-                                </option>
+        {error && (
+          <div className="mb-5 rounded-xl border border-red-400/20 bg-red-400/10 p-4 text-sm text-red-300">
+            {error}
+          </div>
+        )}
+        {success && (
+          <div className="mb-5 rounded-xl border border-emerald-400/20 bg-emerald-400/10 p-4 text-sm text-emerald-300">
+            {success}
+          </div>
+        )}
 
-                                {mealTypes.map((type) => (
-                                    <option
-                                        key={type}
-                                        value={type}
-                                    >
-                                        {type
-                                            .charAt(0)
-                                            .toUpperCase() +
-                                            type.slice(1)}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
+        <section className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <MetricCard
+            label="Calories"
+            value={`${Math.round(summary?.calories || 0)}`}
+            unit="kcal consumed"
+            remaining={targets ? remaining(targets.calories, summary?.calories) : null}
+          />
+          <MetricCard
+            label="Protein"
+            value={`${Math.round(summary?.protein || 0)} g`}
+            unit="consumed"
+            remaining={targets ? remaining(targets.protein, summary?.protein) : null}
+          />
+          <MetricCard
+            label="Carbohydrates"
+            value={`${Math.round(summary?.carbohydrates || 0)} g`}
+            unit="consumed today"
+          />
+          <MetricCard
+            label="Fiber"
+            value={`${Math.round(summary?.fiber || 0)} g`}
+            unit="consumed today"
+          />
+        </section>
 
-                        {/* Meal Name */}
-                        <div>
-                            <label
-                                className="
-                                    mb-1.5
-                                    block
-                                    text-[8px]
-                                    font-semibold
-                                    uppercase
-                                    tracking-[0.22em]
-                                    text-[#626262]
-                                "
-                            >
-                                Meal Name
-                            </label>
-
-                            <input
-                                type="text"
-                                value={formData.mealName}
-                                onChange={(event) =>
-                                    handleChange(
-                                        "mealName",
-                                        event.target.value
-                                    )
-                                }
-                                placeholder="e.g. Chicken rice bowl"
-                                className="
-                                    h-[48px]
-                                    w-full
-                                    rounded-[13px]
-                                    border
-                                    border-[#626262]/[0.34]
-                                    bg-[#626262]/[0.10]
-                                    px-4
-                                    text-[11px]
-                                    font-medium
-                                    text-[#EDEDED]
-                                    outline-none
-                                    placeholder:text-[#626262]
-                                    focus:border-[#B4B4B4]/[0.55]
-                                    focus:bg-[#626262]/[0.15]
-                                "
-                            />
-                        </div>
-
-                        {/* Calories */}
-                        <div>
-                            <label
-                                className="
-                                    mb-1.5
-                                    block
-                                    text-[8px]
-                                    font-semibold
-                                    uppercase
-                                    tracking-[0.22em]
-                                    text-[#626262]
-                                "
-                            >
-                                Calories
-                            </label>
-
-                            <input
-                                type="number"
-                                min="0"
-                                value={formData.calories}
-                                onChange={(event) =>
-                                    handleChange(
-                                        "calories",
-                                        event.target.value
-                                    )
-                                }
-                                placeholder="0"
-                                className="
-                                    h-[48px]
-                                    w-full
-                                    rounded-[13px]
-                                    border
-                                    border-[#626262]/[0.34]
-                                    bg-[#626262]/[0.10]
-                                    px-4
-                                    text-[11px]
-                                    font-medium
-                                    text-[#EDEDED]
-                                    outline-none
-                                    placeholder:text-[#626262]
-                                    focus:border-[#B4B4B4]/[0.55]
-                                    focus:bg-[#626262]/[0.15]
-                                "
-                            />
-                        </div>
-
-                        {/* Macros */}
-                        <div className="grid gap-3 sm:grid-cols-3">
-
-                            <MacroInput
-                                label="Protein"
-                                value={formData.protein}
-                                onChange={(value) =>
-                                    handleChange(
-                                        "protein",
-                                        value
-                                    )
-                                }
-                            />
-
-                            <MacroInput
-                                label="Carbs"
-                                value={formData.carbohydrates}
-                                onChange={(value) =>
-                                    handleChange(
-                                        "carbohydrates",
-                                        value
-                                    )
-                                }
-                            />
-
-                            <MacroInput
-                                label="Fiber"
-                                value={formData.fiber}
-                                onChange={(value) =>
-                                    handleChange(
-                                        "fiber",
-                                        value
-                                    )
-                                }
-                            />
-
-                        </div>
-
-                        {/* Error */}
-                        {error && (
-                            <div
-                                className="
-                                    rounded-[12px]
-                                    border
-                                    border-red-400/20
-                                    bg-red-400/10
-                                    px-4
-                                    py-3
-                                    text-[9px]
-                                    text-red-300
-                                "
-                            >
-                                {error}
-                            </div>
-                        )}
-
-                        {/* Success */}
-                        {success && (
-                            <div
-                                className="
-                                    rounded-[12px]
-                                    border
-                                    border-[#B4B4B4]/20
-                                    bg-[#B4B4B4]/10
-                                    px-4
-                                    py-3
-                                    text-[9px]
-                                    text-[#C0C1C1]
-                                "
-                            >
-                                {success}
-                            </div>
-                        )}
-
-                        {/* Submit */}
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="
-                                mt-2
-                                h-[50px]
-                                w-full
-                                rounded-[14px]
-                                bg-[#EDEDED]
-                                text-[11px]
-                                font-semibold
-                                text-[#0E0E0E]
-                                shadow-[0_12px_30px_rgba(0,0,0,0.25)]
-                                transition-all
-                                duration-300
-                                hover:bg-[#C0C1C1]
-                                active:scale-[0.98]
-                                disabled:cursor-not-allowed
-                                disabled:opacity-50
-                            "
-                        >
-                            {loading
-                                ? "Saving..."
-                                : "Save Meal →"}
-                        </button>
-
-                    </form>
-                </section>
+        {targets && (
+          <section className="mb-8 rounded-2xl border border-[#626262]/30 bg-[#626262]/[0.07] p-5 sm:p-6">
+            <div className="mb-5 flex items-center justify-between gap-3">
+              <h2 className="text-lg font-semibold">Daily targets</h2>
+              <span className="text-xs text-[#858585]">Calculated from your profile</span>
             </div>
-        </main>
-    );
+            <TargetBar
+              label="Calories"
+              consumed={summary?.calories || 0}
+              target={targets.calories}
+              unit="kcal"
+            />
+            <TargetBar
+              label="Protein"
+              consumed={summary?.protein || 0}
+              target={targets.protein}
+              unit="g"
+            />
+          </section>
+        )}
+
+        <section className="mb-8 rounded-2xl border border-[#626262]/30 bg-[#626262]/[0.07] p-5 sm:p-7">
+          <div className="mb-6">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-[#777]">
+              Food database
+            </p>
+            <h2 className="mt-1 text-xl font-semibold">Add food</h2>
+            <p className="mt-1 text-sm text-[#858585]">
+              Search a food, enter its quantity and calculate its macros.
+            </p>
+          </div>
+
+          <div className="grid gap-5 md:grid-cols-[1fr_180px]">
+            <div>
+              <label className={labelClass}>Search food</label>
+              <input
+                className={inputClass}
+                value={search}
+                onChange={(event) => {
+                  setSearch(event.target.value);
+                  setSelectedFood(null);
+                  setNutrition(null);
+                }}
+                placeholder="Try rice, oats, egg, paneer..."
+              />
+
+              {loading && (
+                <p className="mt-2 text-xs text-[#858585]">Searching...</p>
+              )}
+
+              {foods.length > 0 && (
+                <div className="mt-2 max-h-64 overflow-y-auto rounded-xl border border-[#626262]/30 bg-[#171717]">
+                  {foods.map((food) => (
+                    <button
+                      type="button"
+                      key={food._id}
+                      onClick={() => {
+                        setSelectedFood(food);
+                        setSearch(food.name);
+                        setFoods([]);
+                        setNutrition(null);
+                        setError("");
+                      }}
+                      className="flex w-full items-center justify-between gap-3 border-b border-[#626262]/15 px-4 py-3 text-left last:border-0 hover:bg-white/[0.05]"
+                    >
+                      <span className="text-sm">{food.name}</span>
+                      <span className="shrink-0 text-xs text-[#858585]">
+                        {food.caloriesPer100g} kcal / 100 g
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {selectedFood && (
+                <p className="mt-2 text-xs text-emerald-300">
+                  Selected: {selectedFood.name}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label className={labelClass}>
+                Quantity ({selectedFood?.servingUnit || "g"})
+              </label>
+              <input
+                type="number"
+                min="1"
+                step="1"
+                className={inputClass}
+                value={quantity}
+                onChange={(event) => {
+                  setQuantity(event.target.value);
+                  setNutrition(null);
+                }}
+              />
+            </div>
+          </div>
+
+          <div className="mt-5 grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className={labelClass}>Meal type</label>
+              <select
+                className={inputClass}
+                value={mealType}
+                onChange={(event) => setMealType(event.target.value)}
+              >
+                {mealTypes.map((type) => (
+                  <option key={type} value={type}>
+                    {type.charAt(0).toUpperCase() + type.slice(1)}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex items-end">
+              <button
+                type="button"
+                onClick={calculateFood}
+                disabled={loading || !selectedFood}
+                className="h-12 w-full rounded-xl border border-[#626262]/40 bg-[#242424] text-sm font-semibold transition hover:bg-[#333] disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Calculate nutrition
+              </button>
+            </div>
+          </div>
+
+          {nutrition && (
+            <div className="mt-5 rounded-xl border border-[#626262]/25 bg-[#0E0E0E] p-4">
+              <p className="mb-4 text-sm font-semibold">
+                Estimated nutrition · {quantity} {selectedFood?.servingUnit}
+              </p>
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                <NutritionValue label="Calories" value={nutrition.calories} unit="kcal" />
+                <NutritionValue label="Protein" value={nutrition.protein} unit="g" />
+                <NutritionValue label="Carbs" value={nutrition.carbohydrates} unit="g" />
+                <NutritionValue label="Fiber" value={nutrition.fiber} unit="g" />
+              </div>
+              <button
+                type="button"
+                onClick={addSelectedFood}
+                disabled={saving}
+                className="mt-5 h-12 w-full rounded-xl bg-[#EDEDED] text-sm font-semibold text-[#0E0E0E] transition hover:bg-[#C0C1C1] disabled:opacity-50"
+              >
+                {saving ? "Adding..." : "Add to today's log →"}
+              </button>
+            </div>
+          )}
+        </section>
+
+        <section className="mb-8 rounded-2xl border border-[#626262]/30 bg-[#626262]/[0.07] p-5 sm:p-7">
+          <button
+            type="button"
+            onClick={() => setManual((previous) => !previous)}
+            className="flex w-full items-center justify-between text-left"
+          >
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-[#777]">
+                Optional
+              </p>
+              <h2 className="mt-1 text-lg font-semibold">Manual meal entry</h2>
+            </div>
+            <span className="text-sm text-[#858585]">{manual ? "−" : "+"}</span>
+          </button>
+
+          {manual && (
+            <form onSubmit={addManualMeal} className="mt-6 space-y-4">
+              <div>
+                <label className={labelClass}>Meal type</label>
+                <select
+                  className={inputClass}
+                  value={formData.mealType}
+                  onChange={(event) => updateManualField("mealType", event.target.value)}
+                >
+                  <option value="">Select meal</option>
+                  {mealTypes.map((type) => (
+                    <option key={type} value={type}>
+                      {type.charAt(0).toUpperCase() + type.slice(1)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className={labelClass}>Meal name</label>
+                <input
+                  className={inputClass}
+                  value={formData.mealName}
+                  onChange={(event) => updateManualField("mealName", event.target.value)}
+                  placeholder="Describe your meal"
+                />
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                {[
+                  ["calories", "Calories (kcal)"],
+                  ["protein", "Protein (g)"],
+                  ["carbohydrates", "Carbs (g)"],
+                  ["fiber", "Fiber (g)"],
+                ].map(([field, title]) => (
+                  <div key={field}>
+                    <label className={labelClass}>{title}</label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.1"
+                      className={inputClass}
+                      value={formData[field]}
+                      onChange={(event) => updateManualField(field, event.target.value)}
+                    />
+                  </div>
+                ))}
+              </div>
+
+              <button
+                type="submit"
+                disabled={saving}
+                className="h-12 w-full rounded-xl bg-[#EDEDED] text-sm font-semibold text-[#0E0E0E] disabled:opacity-50"
+              >
+                {saving ? "Saving..." : "Save manual meal"}
+              </button>
+            </form>
+          )}
+        </section>
+
+        <section className="rounded-2xl border border-[#626262]/30 bg-[#626262]/[0.07] p-5 sm:p-7">
+          <div className="mb-5 flex items-center justify-between">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-[#777]">
+                {today}
+              </p>
+              <h2 className="mt-1 text-xl font-semibold">Today's meals</h2>
+            </div>
+            <button
+              type="button"
+              onClick={loadDashboard}
+              className="text-xs text-[#B4B4B4] hover:text-white"
+            >
+              Refresh
+            </button>
+          </div>
+
+          {todayMeals.length === 0 ? (
+            <p className="rounded-xl border border-dashed border-[#626262]/30 p-6 text-center text-sm text-[#858585]">
+              No meals logged for today yet.
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {todayMeals.map((meal) => (
+                <article
+                  key={meal._id}
+                  className="flex flex-col gap-3 rounded-xl border border-[#626262]/20 bg-[#0E0E0E] p-4 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div>
+                    <p className="font-medium">{meal.mealName}</p>
+                    <p className="mt-1 text-xs capitalize text-[#858585]">
+                      {meal.mealType} · {new Date(meal.date).toLocaleTimeString("en-IN", {
+                        timeZone: "Asia/Kolkata",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-x-5 gap-y-1 text-xs text-[#B4B4B4] sm:text-right">
+                    <span>{meal.calories} kcal</span>
+                    <span>{meal.protein} g protein</span>
+                    <span>{meal.carbohydrates} g carbs</span>
+                    <span>{meal.fiber} g fiber</span>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </section>
+      </div>
+    </main>
+  );
 }
 
-function MacroInput({
-    label,
-    value,
-    onChange
-}) {
-    return (
-        <div>
-            <label
-                className="
-                    mb-1.5
-                    block
-                    text-[8px]
-                    font-semibold
-                    uppercase
-                    tracking-[0.22em]
-                    text-[#626262]
-                "
-            >
-                {label}
-            </label>
+function MetricCard({ label, value, unit, remaining }) {
+  return (
+    <article className="rounded-2xl border border-[#626262]/30 bg-[#626262]/[0.07] p-5">
+      <p className="text-xs text-[#858585]">{label}</p>
+      <p className="mt-2 text-2xl font-semibold tracking-tight">{value}</p>
+      <p className="mt-1 text-xs text-[#777]">{unit}</p>
+      {remaining !== null && remaining !== undefined && (
+        <p className={`mt-3 text-xs ${remaining < 0 ? "text-amber-300" : "text-emerald-300"}`}>
+          {remaining >= 0 ? `${remaining} remaining` : `${Math.abs(remaining)} over target`}
+        </p>
+      )}
+    </article>
+  );
+}
 
-            <input
-                type="number"
-                min="0"
-                step="0.1"
-                value={value}
-                onChange={(event) =>
-                    onChange(event.target.value)
-                }
-                placeholder="0"
-                className="
-                    h-[48px]
-                    w-full
-                    rounded-[13px]
-                    border
-                    border-[#626262]/[0.34]
-                    bg-[#626262]/[0.10]
-                    px-4
-                    text-[11px]
-                    font-medium
-                    text-[#EDEDED]
-                    outline-none
-                    placeholder:text-[#626262]
-                    focus:border-[#B4B4B4]/[0.55]
-                    focus:bg-[#626262]/[0.15]
-                "
-            />
-        </div>
-    );
+function TargetBar({ label, consumed, target, unit }) {
+  const safeTarget = Number(target) || 0;
+  const amount = Number(consumed) || 0;
+  const percentage = safeTarget > 0 ? Math.min((amount / safeTarget) * 100, 100) : 0;
+  const left = Math.round((safeTarget - amount) * 10) / 10;
+
+  return (
+    <div className="mb-5 last:mb-0">
+      <div className="mb-2 flex items-center justify-between gap-3 text-sm">
+        <span>{label}</span>
+        <span className="text-[#858585]">
+          {Math.round(amount)} / {safeTarget} {unit}
+        </span>
+      </div>
+      <div className="h-2 overflow-hidden rounded-full bg-[#626262]/30">
+        <div
+          className="h-full rounded-full bg-[#EDEDED] transition-all duration-500"
+          style={{ width: `${percentage}%` }}
+        />
+      </div>
+      <p className="mt-2 text-xs text-[#777]">
+        {left >= 0 ? `${left} ${unit} remaining` : `${Math.abs(left)} ${unit} over target`}
+      </p>
+    </div>
+  );
+}
+
+function NutritionValue({ label, value, unit }) {
+  return (
+    <div>
+      <p className="text-xs text-[#858585]">{label}</p>
+      <p className="mt-1 text-lg font-semibold">
+        {value} <span className="text-xs font-normal text-[#858585]">{unit}</span>
+      </p>
+    </div>
+  );
 }
 
 export default Nutrition;
