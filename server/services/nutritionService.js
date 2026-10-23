@@ -105,9 +105,15 @@ const getDailyNutritionSummary = async (userId, date) => {
     const error = new Error("Invalid user ID");
     error.statusCode = 400;
     throw error;
+    
   }
 
   const { startDate, endDate } = getDateRange(date);
+   
+  console.log("Summary userId:", userId);
+  console.log("Summary date:", date);
+  console.log("Start:", startDate.toISOString());
+  console.log("End:", endDate.toISOString());
 
   const summary = await Nutrition.aggregate([
     {
