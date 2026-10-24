@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -20,7 +21,7 @@ function AgeSelection() {
                 relative
                 h-[100dvh]
                 overflow-hidden
-                bg-[#0E0E0E]
+                bg-[#090909]
                 font-sans
                 text-[#EDEDED]
             "
@@ -31,7 +32,7 @@ function AgeSelection() {
                     pointer-events-none
                     absolute
                     inset-0
-                    bg-[radial-gradient(circle_at_50%_20%,rgba(180,180,180,0.07),transparent_38%),radial-gradient(circle_at_50%_100%,rgba(98,98,98,0.08),transparent_42%)]
+                    bg-[radial-gradient(circle_at_50%_20%,rgba(180,180,180,0.09),transparent_38%),radial-gradient(circle_at_50%_100%,rgba(98,98,98,0.10),transparent_42%)]
                 "
             />
 
@@ -52,17 +53,17 @@ function AgeSelection() {
                     lg:py-12
                 "
             >
-                <div className="w-full max-w-[430px]">
+                <div className="w-full max-w-[460px]">
 
                     {/* Header */}
                     <div className="mb-10 sm:mb-12">
 
-                        <div className="mb-4 flex items-center gap-3">
-                            <span className="h-px w-8 bg-[#626262]" />
+                        <div className="mb-5 flex items-center gap-3">
+                            <span className="h-px w-9 bg-[#B4B4B4]/70" />
 
                             <p
                                 className="
-                                    text-[9px]
+                                    text-[10px]
                                     font-medium
                                     uppercase
                                     tracking-[0.34em]
@@ -75,11 +76,11 @@ function AgeSelection() {
 
                         <p
                             className="
-                                text-[9px]
+                                text-[10px]
                                 font-semibold
                                 uppercase
                                 tracking-[0.28em]
-                                text-[#626262]
+                                text-[#777777]
                             "
                         >
                             PERSONALIZE YOUR PROFILE
@@ -87,13 +88,13 @@ function AgeSelection() {
 
                         <h1
                             className="
-                                mt-3
-                                text-[30px]
+                                mt-4
+                                text-[36px]
                                 font-semibold
-                                leading-[0.98]
+                                leading-[1.02]
                                 tracking-[-0.045em]
-                                text-[#EDEDED]
-                                sm:text-[34px]
+                                text-[#F5F5F5]
+                                sm:text-[42px]
                             "
                         >
                             How old are you?
@@ -101,11 +102,11 @@ function AgeSelection() {
 
                         <p
                             className="
-                                mt-4
-                                max-w-[340px]
-                                text-[11px]
-                                leading-[1.7]
-                                text-[#B4B4B4]
+                                mt-5
+                                max-w-[350px]
+                                text-[13px]
+                                leading-[1.8]
+                                text-[#A5A5A5]
                             "
                         >
                             Your age helps us personalize your
@@ -118,13 +119,13 @@ function AgeSelection() {
                         <label
                             htmlFor="age"
                             className="
-                                mb-2
+                                mb-3
                                 block
-                                text-[9px]
+                                text-[10px]
                                 font-semibold
                                 uppercase
                                 tracking-[0.24em]
-                                text-[#626262]
+                                text-[#888888]
                             "
                         >
                             Age
@@ -142,25 +143,25 @@ function AgeSelection() {
                                 }
                                 placeholder="Enter your age"
                                 className="
-                                    h-[58px]
+                                    h-[68px]
                                     w-full
-                                    rounded-[16px]
+                                    rounded-[18px]
                                     border
-                                    border-[#626262]/[0.34]
-                                    bg-[#626262]/[0.12]
+                                    border-[#626262]/[0.38]
+                                    bg-[#626262]/[0.10]
                                     px-5
                                     pr-16
-                                    text-[14px]
+                                    text-[18px]
                                     font-medium
-                                    text-[#EDEDED]
+                                    text-[#F5F5F5]
                                     outline-none
                                     transition-all
                                     duration-300
                                     placeholder:text-[#626262]
-                                    focus:border-[#B4B4B4]/[0.55]
-                                    focus:bg-[#626262]/[0.18]
-                                    focus:ring-1
-                                    focus:ring-[#B4B4B4]/[0.12]
+                                    focus:border-[#EDEDED]/[0.65]
+                                    focus:bg-[#626262]/[0.16]
+                                    focus:ring-2
+                                    focus:ring-[#EDEDED]/[0.05]
                                 "
                             />
 
@@ -171,11 +172,11 @@ function AgeSelection() {
                                     right-5
                                     top-1/2
                                     -translate-y-1/2
-                                    text-[9px]
+                                    text-[10px]
                                     font-semibold
                                     uppercase
                                     tracking-[0.16em]
-                                    text-[#626262]
+                                    text-[#777777]
                                 "
                             >
                                 Years
@@ -185,9 +186,9 @@ function AgeSelection() {
                         <p
                             className="
                                 mt-3
-                                text-[9px]
-                                leading-[1.6]
-                                text-[#626262]
+                                text-[10px]
+                                leading-[1.7]
+                                text-[#777777]
                             "
                         >
                             Enter an age between 13 and 100.
@@ -202,20 +203,25 @@ function AgeSelection() {
                             disabled={!age}
                             onClick={handleNext}
                             className="
-                                h-[50px]
+                                group
+                                flex
+                                h-[56px]
                                 w-full
-                                rounded-[15px]
+                                items-center
+                                justify-center
+                                gap-3
+                                rounded-[18px]
                                 border
-                                border-[#EDEDED]/[0.18]
+                                border-[#EDEDED]/[0.20]
                                 bg-[#EDEDED]
-                                text-[12px]
+                                text-[14px]
                                 font-semibold
                                 tracking-[0.01em]
                                 text-[#0E0E0E]
                                 shadow-[0_12px_35px_rgba(0,0,0,0.28)]
                                 transition-all
                                 duration-300
-                                hover:bg-[#C0C1C1]
+                                hover:bg-[#D5D5D5]
                                 hover:shadow-[0_16px_42px_rgba(0,0,0,0.34)]
                                 active:scale-[0.985]
                                 disabled:cursor-not-allowed
@@ -226,32 +232,27 @@ function AgeSelection() {
                             "
                         >
                             Continue
+                            <span className="text-lg transition-transform duration-300 group-hover:translate-x-1">
+                                →
+                            </span>
                         </button>
 
                         {/* Progress */}
-                        <div className="mt-7 flex items-center justify-center gap-2">
-                            <span
-                                className="
-                                    h-[3px]
-                                    w-7
-                                    rounded-full
-                                    bg-[#EDEDED]
-                                "
-                            />
-
-                            <span className="h-[3px] w-[3px] rounded-full bg-[#626262]" />
-                            <span className="h-[3px] w-[3px] rounded-full bg-[#626262]" />
-                            <span className="h-[3px] w-[3px] rounded-full bg-[#626262]" />
+                        <div className="mt-8 flex items-center justify-center gap-2">
+                            <span className="h-[3px] w-8 rounded-full bg-[#EDEDED]" />
+                            <span className="h-[3px] w-[4px] rounded-full bg-[#626262]" />
+                            <span className="h-[3px] w-[4px] rounded-full bg-[#626262]" />
+                            <span className="h-[3px] w-[4px] rounded-full bg-[#626262]" />
                         </div>
 
                         <p
                             className="
                                 mt-4
                                 text-center
-                                text-[8px]
+                                text-[9px]
                                 uppercase
                                 tracking-[0.24em]
-                                text-[#626262]
+                                text-[#777777]
                             "
                         >
                             Building your profile
