@@ -1,4 +1,3 @@
-
 import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 
@@ -50,13 +49,10 @@ function Nutrition() {
         await Promise.all([
           axios.get(
             `${API_URL}/nutrition/summary?date=${today}`,
-            requestConfig
+            requestConfig,
           ),
           axios.get(`${API_URL}/nutrition/targets`, requestConfig),
-          axios.get(
-            `${API_URL}/nutrition?date=${today}`,
-            requestConfig
-          ),
+          axios.get(`${API_URL}/nutrition?date=${today}`, requestConfig),
         ]);
 
       setSummary(summaryResponse.data.data.summary);
@@ -66,7 +62,7 @@ function Nutrition() {
       console.error("Nutrition dashboard error:", err);
       setError(
         err.response?.data?.message ||
-          "Could not load nutrition data. Please log in again if needed."
+          "Could not load nutrition data. Please log in again if needed.",
       );
     }
   }, [today]);
@@ -84,9 +80,11 @@ function Nutrition() {
 
       try {
         setLoading(true);
+
         const response = await axios.get(
-          `${API_URL}/foods?q=${encodeURIComponent(search.trim())}&limit=20`
+          `${API_URL}/foods?q=${encodeURIComponent(search.trim())}&limit=20`,
         );
+
         setFoods(response.data.data.foods || []);
       } catch (err) {
         console.error("Food search error:", err);
@@ -115,19 +113,19 @@ function Nutrition() {
       setSuccess("");
       setLoading(true);
 
-      const response = await axios.post(
-        `${API_URL}/foods/calculate`,
-        {
-          foodId: selectedFood._id,
-          quantity: Number(quantity),
-        }
-      );
+      const response = await axios.post(`${API_URL}/foods/calculate`, {
+        foodId: selectedFood._id,
+        quantity: Number(quantity),
+      });
 
-      setNutrition(response.data.data.nutrition);
+      const result = response.data.data;
+
+      setNutrition({
+        ...result.nutrition,
+        quantityInGrams: result.quantityInGrams ?? null,
+      });
     } catch (err) {
-      setError(
-        err.response?.data?.message || "Could not calculate nutrition."
-      );
+      setError(err.response?.data?.message || "Could not calculate nutrition.");
     } finally {
       setLoading(false);
     }
@@ -152,7 +150,7 @@ function Nutrition() {
           mealType,
           date: today,
         },
-        requestConfig
+        requestConfig,
       );
 
       setSuccess("Food added to today's nutrition log.");
@@ -177,14 +175,21 @@ function Nutrition() {
   const addManualMeal = async (event) => {
     event.preventDefault();
 
-    const { mealType: type, mealName, calories, protein, carbohydrates, fiber } =
-      formData;
+    const {
+      mealType: type,
+      mealName,
+      calories,
+      protein,
+      carbohydrates,
+      fiber,
+    } = formData;
 
     if (
       !type ||
       !mealName.trim() ||
       [calories, protein, carbohydrates, fiber].some(
-        (value) => value === "" || !Number.isFinite(Number(value)) || Number(value) < 0
+        (value) =>
+          value === "" || !Number.isFinite(Number(value)) || Number(value) < 0,
       )
     ) {
       setError("Fill all fields with valid non-negative numbers.");
@@ -207,7 +212,7 @@ function Nutrition() {
           carbohydrates: Number(carbohydrates),
           fiber: Number(fiber),
         },
-        requestConfig
+        requestConfig,
       );
 
       setSuccess("Meal saved successfully.");
@@ -243,6 +248,7 @@ function Nutrition() {
             {error}
           </div>
         )}
+
         {success && (
           <div className="mb-5 rounded-xl border border-emerald-400/20 bg-emerald-400/10 p-4 text-sm text-emerald-300">
             {success}
@@ -254,19 +260,26 @@ function Nutrition() {
             label="Calories"
             value={`${Math.round(summary?.calories || 0)}`}
             unit="kcal consumed"
-            remaining={targets ? remaining(targets.calories, summary?.calories) : null}
+            remaining={
+              targets ? remaining(targets.calories, summary?.calories) : null
+            }
           />
+
           <MetricCard
             label="Protein"
             value={`${Math.round(summary?.protein || 0)} g`}
             unit="consumed"
-            remaining={targets ? remaining(targets.protein, summary?.protein) : null}
+            remaining={
+              targets ? remaining(targets.protein, summary?.protein) : null
+            }
           />
+
           <MetricCard
             label="Carbohydrates"
             value={`${Math.round(summary?.carbohydrates || 0)} g`}
             unit="consumed today"
           />
+
           <MetricCard
             label="Fiber"
             value={`${Math.round(summary?.fiber || 0)} g`}
@@ -278,14 +291,18 @@ function Nutrition() {
           <section className="mb-8 rounded-2xl border border-[#626262]/30 bg-[#626262]/[0.07] p-5 sm:p-6">
             <div className="mb-5 flex items-center justify-between gap-3">
               <h2 className="text-lg font-semibold">Daily targets</h2>
-              <span className="text-xs text-[#858585]">Calculated from your profile</span>
+              <span className="text-xs text-[#858585]">
+                Calculated from your profile
+              </span>
             </div>
+
             <TargetBar
               label="Calories"
               consumed={summary?.calories || 0}
               target={targets.calories}
               unit="kcal"
             />
+
             <TargetBar
               label="Protein"
               consumed={summary?.protein || 0}
@@ -309,6 +326,7 @@ function Nutrition() {
           <div className="grid gap-5 md:grid-cols-[1fr_180px]">
             <div>
               <label className={labelClass}>Search food</label>
+
               <input
                 className={inputClass}
                 value={search}
@@ -332,6 +350,7 @@ function Nutrition() {
                       key={food._id}
                       onClick={() => {
                         setSelectedFood(food);
+                        setQuantity(food.servingUnit === "pcs" ? "1" : "100");
                         setSearch(food.name);
                         setFoods([]);
                         setNutrition(null);
@@ -341,7 +360,8 @@ function Nutrition() {
                     >
                       <span className="text-sm">{food.name}</span>
                       <span className="shrink-0 text-xs text-[#858585]">
-                        {food.caloriesPer100g} kcal / 100 g
+                        {food.caloriesPer100g} kcal / 100{" "}
+                        {food.servingUnit === "ml" ? "ml" : "g"}
                       </span>
                     </button>
                   ))}
@@ -359,17 +379,36 @@ function Nutrition() {
               <label className={labelClass}>
                 Quantity ({selectedFood?.servingUnit || "g"})
               </label>
+
               <input
                 type="number"
-                min="1"
-                step="1"
+                min={selectedFood?.servingUnit === "pcs" ? "1" : "0.1"}
+                step={selectedFood?.servingUnit === "pcs" ? "1" : "0.1"}
                 className={inputClass}
                 value={quantity}
                 onChange={(event) => {
-                  setQuantity(event.target.value);
+                  const value = event.target.value;
+
+                  if (
+                    selectedFood?.servingUnit === "pcs" &&
+                    value !== "" &&
+                    !/^\d+$/.test(value)
+                  ) {
+                    return;
+                  }
+
+                  setQuantity(value);
                   setNutrition(null);
                 }}
               />
+
+              <p className="mt-2 text-xs leading-relaxed text-[#777]">
+                {selectedFood?.servingUnit === "pcs"
+                  ? `1 piece ≈ ${selectedFood.gramsPerPiece || "unknown"} g`
+                  : selectedFood?.servingUnit === "ml"
+                    ? "Enter quantity in millilitres"
+                    : "Enter quantity in grams"}
+              </p>
             </div>
           </div>
 
@@ -388,6 +427,7 @@ function Nutrition() {
                 ))}
               </select>
             </div>
+
             <div className="flex items-end">
               <button
                 type="button"
@@ -404,13 +444,37 @@ function Nutrition() {
             <div className="mt-5 rounded-xl border border-[#626262]/25 bg-[#0E0E0E] p-4">
               <p className="mb-4 text-sm font-semibold">
                 Estimated nutrition · {quantity} {selectedFood?.servingUnit}
+                {selectedFood?.servingUnit === "pcs" &&
+                  nutrition.quantityInGrams != null && (
+                    <span className="ml-1 text-xs font-normal text-[#858585]">
+                      ({nutrition.quantityInGrams} g)
+                    </span>
+                  )}
               </p>
+
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-                <NutritionValue label="Calories" value={nutrition.calories} unit="kcal" />
-                <NutritionValue label="Protein" value={nutrition.protein} unit="g" />
-                <NutritionValue label="Carbs" value={nutrition.carbohydrates} unit="g" />
-                <NutritionValue label="Fiber" value={nutrition.fiber} unit="g" />
+                <NutritionValue
+                  label="Calories"
+                  value={nutrition.calories}
+                  unit="kcal"
+                />
+                <NutritionValue
+                  label="Protein"
+                  value={nutrition.protein}
+                  unit="g"
+                />
+                <NutritionValue
+                  label="Carbs"
+                  value={nutrition.carbohydrates}
+                  unit="g"
+                />
+                <NutritionValue
+                  label="Fiber"
+                  value={nutrition.fiber}
+                  unit="g"
+                />
               </div>
+
               <button
                 type="button"
                 onClick={addSelectedFood}
@@ -445,7 +509,9 @@ function Nutrition() {
                 <select
                   className={inputClass}
                   value={formData.mealType}
-                  onChange={(event) => updateManualField("mealType", event.target.value)}
+                  onChange={(event) =>
+                    updateManualField("mealType", event.target.value)
+                  }
                 >
                   <option value="">Select meal</option>
                   {mealTypes.map((type) => (
@@ -461,7 +527,9 @@ function Nutrition() {
                 <input
                   className={inputClass}
                   value={formData.mealName}
-                  onChange={(event) => updateManualField("mealName", event.target.value)}
+                  onChange={(event) =>
+                    updateManualField("mealName", event.target.value)
+                  }
                   placeholder="Describe your meal"
                 />
               </div>
@@ -481,7 +549,9 @@ function Nutrition() {
                       step="0.1"
                       className={inputClass}
                       value={formData[field]}
-                      onChange={(event) => updateManualField(field, event.target.value)}
+                      onChange={(event) =>
+                        updateManualField(field, event.target.value)
+                      }
                     />
                   </div>
                 ))}
@@ -506,6 +576,7 @@ function Nutrition() {
               </p>
               <h2 className="mt-1 text-xl font-semibold">Today's meals</h2>
             </div>
+
             <button
               type="button"
               onClick={loadDashboard}
@@ -529,13 +600,15 @@ function Nutrition() {
                   <div>
                     <p className="font-medium">{meal.mealName}</p>
                     <p className="mt-1 text-xs capitalize text-[#858585]">
-                      {meal.mealType} · {new Date(meal.date).toLocaleTimeString("en-IN", {
+                      {meal.mealType} ·{" "}
+                      {new Date(meal.date).toLocaleTimeString("en-IN", {
                         timeZone: "Asia/Kolkata",
                         hour: "2-digit",
                         minute: "2-digit",
                       })}
                     </p>
                   </div>
+
                   <div className="grid grid-cols-2 gap-x-5 gap-y-1 text-xs text-[#B4B4B4] sm:text-right">
                     <span>{meal.calories} kcal</span>
                     <span>{meal.protein} g protein</span>
@@ -558,9 +631,16 @@ function MetricCard({ label, value, unit, remaining }) {
       <p className="text-xs text-[#858585]">{label}</p>
       <p className="mt-2 text-2xl font-semibold tracking-tight">{value}</p>
       <p className="mt-1 text-xs text-[#777]">{unit}</p>
+
       {remaining !== null && remaining !== undefined && (
-        <p className={`mt-3 text-xs ${remaining < 0 ? "text-amber-300" : "text-emerald-300"}`}>
-          {remaining >= 0 ? `${remaining} remaining` : `${Math.abs(remaining)} over target`}
+        <p
+          className={`mt-3 text-xs ${
+            remaining < 0 ? "text-amber-300" : "text-emerald-300"
+          }`}
+        >
+          {remaining >= 0
+            ? `${remaining} remaining`
+            : `${Math.abs(remaining)} over target`}
         </p>
       )}
     </article>
@@ -570,7 +650,8 @@ function MetricCard({ label, value, unit, remaining }) {
 function TargetBar({ label, consumed, target, unit }) {
   const safeTarget = Number(target) || 0;
   const amount = Number(consumed) || 0;
-  const percentage = safeTarget > 0 ? Math.min((amount / safeTarget) * 100, 100) : 0;
+  const percentage =
+    safeTarget > 0 ? Math.min((amount / safeTarget) * 100, 100) : 0;
   const left = Math.round((safeTarget - amount) * 10) / 10;
 
   return (
@@ -581,14 +662,18 @@ function TargetBar({ label, consumed, target, unit }) {
           {Math.round(amount)} / {safeTarget} {unit}
         </span>
       </div>
+
       <div className="h-2 overflow-hidden rounded-full bg-[#626262]/30">
         <div
           className="h-full rounded-full bg-[#EDEDED] transition-all duration-500"
           style={{ width: `${percentage}%` }}
         />
       </div>
+
       <p className="mt-2 text-xs text-[#777]">
-        {left >= 0 ? `${left} ${unit} remaining` : `${Math.abs(left)} ${unit} over target`}
+        {left >= 0
+          ? `${left} ${unit} remaining`
+          : `${Math.abs(left)} ${unit} over target`}
       </p>
     </div>
   );
@@ -599,7 +684,8 @@ function NutritionValue({ label, value, unit }) {
     <div>
       <p className="text-xs text-[#858585]">{label}</p>
       <p className="mt-1 text-lg font-semibold">
-        {value} <span className="text-xs font-normal text-[#858585]">{unit}</span>
+        {value}{" "}
+        <span className="text-xs font-normal text-[#858585]">{unit}</span>
       </p>
     </div>
   );
