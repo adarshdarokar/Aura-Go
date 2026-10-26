@@ -1,4 +1,3 @@
-
 const mongoose = require("mongoose");
 
 const foodSchema = new mongoose.Schema(
@@ -36,9 +35,17 @@ const foodSchema = new mongoose.Schema(
 
         servingUnit: {
             type: String,
-            enum: ["g", "ml"],
+            enum: ["g", "ml", "pcs"],
             default: "g",
             required: true
+        },
+
+        // Weight in grams for one piece.
+        // Required for accurate nutrition calculation when servingUnit is "pcs".
+        gramsPerPiece: {
+            type: Number,
+            min: 0.1,
+            default: null
         },
 
         caloriesPer100g: {
@@ -83,6 +90,16 @@ foodSchema.index(
 foodSchema.index({
     category: 1,
     isActive: 1
+});
+
+// Pieces must have a known weight for accurate calculations.
+foodSchema.pre("validate", function () {
+    if (this.servingUnit === "pcs" && !this.gramsPerPiece) {
+        this.invalidate(
+            "gramsPerPiece",
+            "Grams per piece are required for piece-based foods."
+        );
+    }
 });
 
 module.exports = mongoose.model("Food", foodSchema);
