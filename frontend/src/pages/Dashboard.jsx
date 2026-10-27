@@ -484,6 +484,10 @@ function Dashboard() {
                 onClick={() => {
                   if (action.id === "nutrition") {
                     navigate("/nutrition");
+                  } else if (action.id === "progress") {
+                    navigate("/progress");
+                  } else if (action.id === "workout") {
+                    navigate("/workout");
                   }
                 }}
                 className="

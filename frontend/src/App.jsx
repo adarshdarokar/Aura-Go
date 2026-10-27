@@ -6,6 +6,7 @@ import GenderSelection from "./pages/GenderSelection";
 import ProfileDetails from "./pages/ProfileDetails";
 import Dashboard from "./pages/Dashboard";
 import Nutrition from "./pages/Nutrition";
+import Progress from "./pages/Progress";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
         {/* Dashboard */}
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/nutrition" element={<Nutrition />} />
+        <Route path="/progress" element={<Progress />} />
       </Routes>
     </BrowserRouter>
   );
