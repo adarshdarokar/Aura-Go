@@ -5,6 +5,7 @@ const exerciseRoutes = require("./exerciseRoutes");
 const router = express.Router();
 const workoutRoutes = require("./workoutRoutes");
 const nutritionRoutes = require("./nutritionRoutes");
+const progressRoutes = require("./progressRoutes");
 const foodController = require("../controllers/foodController");
 const {
   calculateFoodNutritionController,
@@ -14,11 +15,13 @@ router.use("/users", userRoutes);
 router.use("/exercises", exerciseRoutes);
 router.use("/workouts", workoutRoutes);
 router.use("/nutrition", nutritionRoutes);
+router.use("/progress", progressRoutes);
 
 // Food Search Route
 router.get("/foods", foodController.searchFoodsController);
 
 router.post("/foods/calculate", calculateFoodNutritionController);
+
 
 router.get("/health", (req, res) => {
   res.json({
