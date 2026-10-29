@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-
+import Workout from "./pages/Workout";
 import Auth from "./pages/Auth";
 import OnboardingGoal from "./pages/OnboardingGoal";
 import GenderSelection from "./pages/GenderSelection";
@@ -26,6 +26,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/nutrition" element={<Nutrition />} />
         <Route path="/progress" element={<Progress />} />
+        <Route path="/workout" element={<Workout />} />
       </Routes>
     </BrowserRouter>
   );
