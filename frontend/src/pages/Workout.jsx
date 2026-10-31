@@ -1,4 +1,3 @@
-
 import { useCallback, useEffect, useMemo, useState } from "react";
 import axios from "axios";
 
@@ -94,6 +93,7 @@ function Modal({ title, onClose, children, wide = false }) {
       >
         <header className="sticky top-0 z-10 flex items-center justify-between border-b border-[#363636] bg-[#202020] px-5 py-4">
           <h2 className="text-lg font-bold text-white">{title}</h2>
+
           <button
             type="button"
             onClick={onClose}
@@ -103,6 +103,7 @@ function Modal({ title, onClose, children, wide = false }) {
             ×
           </button>
         </header>
+
         <div className="p-5">{children}</div>
       </section>
     </div>
@@ -199,6 +200,7 @@ function WorkoutFormModal({ workout, onClose, onSave, busy }) {
           <Button variant="secondary" onClick={onClose}>
             Cancel
           </Button>
+
           <Button type="submit" disabled={busy || !form.name.trim()}>
             {busy ? "Saving..." : workout ? "Save changes" : "Create workout"}
           </Button>
@@ -219,6 +221,7 @@ function ExerciseRow({
   busy,
 }) {
   const exercise = item.exercise || {};
+
   const [form, setForm] = useState({
     sets: item.sets ?? 3,
     reps: item.reps ?? 12,
@@ -271,13 +274,16 @@ function ExerciseRow({
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#333] text-sm font-bold text-neutral-200">
             {index + 1}
           </div>
+
           <div className="min-w-0">
             <h4 className="break-words font-semibold text-white">
               {exercise.name || "Exercise"}
             </h4>
+
             <p className="mt-1 text-xs text-neutral-500">
               {(exercise.primaryMuscles || []).join(", ") || "Strength"}
             </p>
+
             {!editing && (
               <p className="mt-2 text-sm text-neutral-400">
                 {item.sets} sets × {item.reps} reps
@@ -299,6 +305,7 @@ function ExerciseRow({
             >
               Edit
             </Button>
+
             <Button
               variant="danger"
               onClick={onRemove}
@@ -327,6 +334,7 @@ function ExerciseRow({
               required
             />
           </Field>
+
           <Field label="Reps">
             <input
               className={inputClass}
@@ -338,6 +346,7 @@ function ExerciseRow({
               required
             />
           </Field>
+
           <Field label="Weight (kg)">
             <input
               className={inputClass}
@@ -349,6 +358,7 @@ function ExerciseRow({
               required
             />
           </Field>
+
           <Field label="Rest (sec)">
             <input
               className={inputClass}
@@ -365,6 +375,7 @@ function ExerciseRow({
             <Button variant="secondary" onClick={onCancel}>
               Cancel
             </Button>
+
             <Button type="submit" disabled={busy}>
               {busy ? "Saving..." : "Save exercise"}
             </Button>
@@ -374,7 +385,431 @@ function ExerciseRow({
     </article>
   );
 }
+const MUSCLE_TUTORIALS = [
+  {
+    name: "Chest",
+    subtitle: "Build a stronger, fuller chest",
+    parts: [
+      {
+        name: "Upper Chest",
+        description: "Focus on upper chest development.",
+        exercises: [
+          {
+            name: "Incline Dumbbell Fly",
+            equipment: "Incline bench, dumbbells",
+            target: "Upper chest",
+            sets: 3,
+            reps: "10-12",
+            rest: 60,
+            instructions:
+              "Set a low incline. Keep a soft elbow bend, lower with control, then bring dumbbells together.",
+            mistakes:
+              "Using too much weight or lowering beyond a comfortable range.",
+          },
+          {
+            name: "Incline Dumbbell Press",
+            equipment: "Incline bench, dumbbells",
+            target: "Upper chest",
+            sets: 3,
+            reps: "8-12",
+            rest: 90,
+            instructions:
+              "Keep shoulder blades stable, lower toward upper chest and press smoothly.",
+            mistakes:
+              "Setting the bench too steep or bouncing the dumbbells.",
+          },
+          {
+            name: "Incline Barbell Press",
+            equipment: "Incline bench, barbell",
+            target: "Upper chest",
+            sets: 3,
+            reps: "6-10",
+            rest: 120,
+            instructions:
+              "Lower the bar toward upper chest and press in a controlled path.",
+            mistakes:
+              "Bouncing the bar or flaring elbows excessively.",
+          },
+        ],
+      },
+      {
+        name: "Middle Chest",
+        description: "Train middle chest with horizontal pressing movements.",
+        exercises: [
+          {
+            name: "Flat Dumbbell Press",
+            equipment: "Flat bench, dumbbells",
+            target: "Middle chest",
+            sets: 3,
+            reps: "8-12",
+            rest: 90,
+            instructions:
+              "Keep feet planted and shoulder blades stable. Lower beside chest and press.",
+            mistakes: "Bouncing or losing shoulder position.",
+          },
+          {
+            name: "Flat Barbell Bench Press",
+            equipment: "Flat bench, barbell",
+            target: "Middle chest",
+            sets: 3,
+            reps: "6-10",
+            rest: 120,
+            instructions:
+              "Lower the bar to mid-chest and press with feet grounded.",
+            mistakes: "Bouncing the bar or lifting hips.",
+          },
+          {
+            name: "Pec Deck Fly",
+            equipment: "Pec deck machine",
+            target: "Middle chest",
+            sets: 3,
+            reps: "12-15",
+            rest: 60,
+            instructions:
+              "Keep your back supported and bring handles together.",
+            mistakes: "Using momentum or overstretching.",
+          },
+        ],
+      },
+      {
+        name: "Lower Chest",
+        description: "Emphasize lower chest fibers.",
+        exercises: [
+          {
+            name: "Decline Dumbbell Press",
+            equipment: "Decline bench, dumbbells",
+            target: "Lower chest",
+            sets: 3,
+            reps: "8-12",
+            rest: 90,
+            instructions:
+              "Secure your legs, lower toward lower chest and press with control.",
+            mistakes: "Unstable setup or bouncing.",
+          },
+          {
+            name: "Decline Barbell Press",
+            equipment: "Decline bench, barbell",
+            target: "Lower chest",
+            sets: 3,
+            reps: "6-10",
+            rest: 120,
+            instructions:
+              "Keep your body secured and press without losing shoulder position.",
+            mistakes: "Unsecured legs or bouncing the bar.",
+          },
+          {
+            name: "High-to-Low Cable Fly",
+            equipment: "Cable machine",
+            target: "Lower chest",
+            sets: 3,
+            reps: "12-15",
+            rest: 60,
+            instructions:
+              "Start with handles high and sweep down toward your hips.",
+            mistakes: "Using momentum or shrugging.",
+          },
+        ],
+      },
+    ],
+  },
+];
 
+const muscleImages = {
+  Chest:
+    "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=900&q=85",
+};
+
+function VideoPlaceholder({ title }) {
+  const [requested, setRequested] = useState(false);
+
+  return (
+    <div className="relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-xl border border-[#414141] bg-[radial-gradient(ellipse_at_center,_#303030_0%,_#171717_72%)]">
+      <div className="flex flex-col items-center gap-2 text-center">
+        <button
+          type="button"
+          onClick={() => setRequested(true)}
+          className="flex h-12 w-12 items-center justify-center rounded-full border border-white/30 bg-white/10 text-xl text-white transition hover:bg-white/20"
+        >
+          ▶
+        </button>
+
+        <span className="text-xs font-semibold text-neutral-300">
+          {requested ? "Video slot ready for integration" : "Video player"}
+        </span>
+
+        <span className="text-[11px] text-neutral-500">
+          {title} · Video source will be connected later
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function MuscleTutorials({ workout, library, onAdd, addingId }) {
+  const [selectedMuscle, setSelectedMuscle] = useState("Chest");
+  const [selectedPart, setSelectedPart] = useState("Upper Chest");
+  const [selectedExercise, setSelectedExercise] = useState(null);
+
+  const muscle = MUSCLE_TUTORIALS.find(
+    (item) => item.name === selectedMuscle
+  );
+
+  const part = muscle.parts.find(
+    (item) => item.name === selectedPart
+  );
+
+  const existingIds = new Set(
+    (workout.exercises || []).map((item) =>
+      String(item.exercise?._id || item.exercise)
+    )
+  );
+
+  const findExercise = (name) => {
+    const aliases = {
+      "Flat Barbell Bench Press": "Barbell Bench Press",
+    };
+
+    const lookupName = aliases[name] || name;
+
+    return library.find(
+      (item) =>
+        item.name?.trim().toLowerCase() ===
+        lookupName.trim().toLowerCase()
+    );
+  };
+
+  return (
+    <section className="space-y-5 border-t border-[#363636] pt-6">
+      <div>
+        <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-neutral-500">
+          Learn · Train · Improve
+        </p>
+
+        <h3 className="mt-1 text-xl font-bold text-white">
+          Muscle Tutorials
+        </h3>
+
+        <p className="mt-1 text-sm text-neutral-500">
+          Select a muscle, explore its parts and learn every movement.
+        </p>
+      </div>
+
+      {/* Muscle selection */}
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+        {MUSCLE_TUTORIALS.map((item) => (
+          <button
+            key={item.name}
+            onClick={() => {
+              setSelectedMuscle(item.name);
+              setSelectedPart(item.parts[0].name);
+              setSelectedExercise(null);
+            }}
+            className={cn(
+              "rounded-xl border px-3 py-3 text-left transition",
+              selectedMuscle === item.name
+                ? "border-white bg-white text-black"
+                : "border-[#3b3b3b] bg-[#242424] text-neutral-300"
+            )}
+          >
+            <span className="text-sm font-semibold">
+              {item.name}
+            </span>
+          </button>
+        ))}
+      </div>
+
+      {/* Selected muscle banner */}
+      <div className="relative h-40 overflow-hidden rounded-2xl border border-[#383838]">
+        <img
+          src={muscleImages[muscle.name]}
+          alt={muscle.name}
+          className="h-full w-full object-cover opacity-40"
+        />
+
+        <div className="absolute inset-0 flex flex-col justify-center bg-gradient-to-r from-black via-black/70 to-transparent px-6">
+          <p className="text-xs uppercase tracking-widest text-neutral-400">
+            Selected muscle
+          </p>
+
+          <h4 className="text-3xl font-black text-white">
+            {muscle.name}
+          </h4>
+
+          <p className="text-sm text-neutral-300">
+            {muscle.subtitle}
+          </p>
+        </div>
+      </div>
+
+      {/* Muscle parts */}
+      <div>
+        <h4 className="mb-3 font-semibold text-white">
+          Muscle Parts
+        </h4>
+
+        <div className="grid gap-3 sm:grid-cols-3">
+          {muscle.parts.map((item) => (
+            <button
+              key={item.name}
+              onClick={() => {
+                setSelectedPart(item.name);
+                setSelectedExercise(null);
+              }}
+              className={cn(
+                "rounded-xl border p-3 text-left transition",
+                selectedPart === item.name
+                  ? "border-white bg-[#343434]"
+                  : "border-[#383838] bg-[#292929]"
+              )}
+            >
+              <img
+                src={muscleImages[muscle.name]}
+                alt={item.name}
+                className="mb-3 h-28 w-full rounded-lg object-cover"
+              />
+
+              <h5 className="font-semibold text-white">
+                {item.name}
+              </h5>
+
+              <p className="mt-1 text-xs text-neutral-500">
+                {item.description}
+              </p>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Part overview video */}
+      <div className="border-t border-[#383838] pt-5">
+        <h4 className="mb-2 text-lg font-bold text-white">
+          {part.name} Overview
+        </h4>
+
+        <p className="mb-4 text-sm text-neutral-400">
+          {part.description}
+        </p>
+
+        <VideoPlaceholder title={`${part.name} overview`} />
+      </div>
+
+      {/* Individual exercises */}
+      <div className="border-t border-[#383838] pt-5">
+        <h4 className="mb-3 font-semibold text-white">
+          {part.name} Exercises
+        </h4>
+
+        <div className="grid gap-3 md:grid-cols-2">
+          {part.exercises.map((exercise) => {
+            const match = findExercise(exercise.name);
+            const id = match?._id ? String(match._id) : "";
+            const added = id && existingIds.has(id);
+            const active =
+              selectedExercise?.name === exercise.name;
+
+            return (
+              <article
+                key={exercise.name}
+                className="overflow-hidden rounded-xl border border-[#3a3a3a] bg-[#252525]"
+              >
+                <button
+                  onClick={() =>
+                    setSelectedExercise(active ? null : exercise)
+                  }
+                  className="w-full text-left"
+                >
+                  <img
+                    src={muscleImages[muscle.name]}
+                    alt={exercise.name}
+                    className="h-36 w-full object-cover opacity-75"
+                  />
+
+                  <div className="p-3">
+                    <h5 className="font-semibold text-white">
+                      {exercise.name}
+                    </h5>
+
+                    <p className="mt-1 text-xs text-neutral-500">
+                      {exercise.sets} sets · {exercise.reps} reps ·{" "}
+                      {exercise.rest}s rest
+                    </p>
+                  </div>
+                </button>
+
+                {active && (
+                  <div className="space-y-3 border-t border-[#3a3a3a] p-3">
+                    <VideoPlaceholder title={exercise.name} />
+
+                    <div className="grid grid-cols-2 gap-2">
+                      {[
+                        ["TARGET MUSCLE", exercise.target],
+                        ["EQUIPMENT", exercise.equipment],
+                        [
+                          "SETS × REPS",
+                          `${exercise.sets} × ${exercise.reps}`,
+                        ],
+                        ["REST", `${exercise.rest} sec`],
+                      ].map(([label, value]) => (
+                        <div
+                          key={label}
+                          className="rounded-lg bg-[#1b1b1b] p-2"
+                        >
+                          <p className="text-[10px] text-neutral-500">
+                            {label}
+                          </p>
+
+                          <p className="mt-1 text-xs text-neutral-200">
+                            {value}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div>
+                      <p className="text-xs font-semibold text-neutral-200">
+                        How to perform
+                      </p>
+
+                      <p className="mt-1 text-xs text-neutral-400">
+                        {exercise.instructions}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="text-xs font-semibold text-neutral-200">
+                        Common mistakes
+                      </p>
+
+                      <p className="mt-1 text-xs text-neutral-400">
+                        {exercise.mistakes}
+                      </p>
+                    </div>
+
+                    <Button
+                      className="w-full"
+                      disabled={
+                        !match || Boolean(added) || addingId === id
+                      }
+                      onClick={() => onAdd(match, exercise)}
+                    >
+                      {added
+                        ? "Already in workout"
+                        : !match
+                        ? "Not in exercise library yet"
+                        : addingId === id
+                        ? "Adding..."
+                        : "+ Add to this workout"}
+                    </Button>
+                  </div>
+                )}
+              </article>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
 function ManageExercises({
   workout,
   onClose,
@@ -417,7 +852,9 @@ function ManageExercises({
   }, [loadLibrary]);
 
   const existingIds = new Set(
-    exercises.map((item) => String(item.exercise?._id || item.exercise))
+    exercises.map((item) =>
+      String(item.exercise?._id || item.exercise)
+    )
   );
 
   const filteredLibrary = library.filter((exercise) => {
@@ -455,7 +892,10 @@ function ManageExercises({
       );
 
       const updatedWorkout = response.data?.data?.workout;
-      if (!updatedWorkout) throw new Error("Updated workout was not returned");
+
+      if (!updatedWorkout) {
+        throw new Error("Updated workout was not returned");
+      }
 
       onChanged(normalizeWorkout(updatedWorkout));
       notify(`${exercise.name} added successfully.`);
@@ -466,14 +906,67 @@ function ManageExercises({
     }
   };
 
+  // Add tutorial exercise to current workout
+  const addTutorialExercise = async (exercise, tutorial) => {
+    if (!exercise?._id) return;
+
+    if (existingIds.has(String(exercise._id))) {
+      notify("This exercise is already in the workout.", "error");
+      return;
+    }
+
+    setAddingId(String(exercise._id));
+    setError("");
+
+    try {
+      const maxOrder = exercises.reduce(
+        (max, item) => Math.max(max, Number(item.order) || 0),
+        0
+      );
+
+      const reps =
+        Number.parseInt(String(tutorial.reps).split("-")[0], 10) || 12;
+
+      const response = await request.post(
+        `/workouts/${workout._id}/exercises`,
+        {
+          exercise: exercise._id,
+          sets: tutorial.sets,
+          reps,
+          weight: 0,
+          restTime: tutorial.rest,
+          order: maxOrder + 1,
+        }
+      );
+
+      const updatedWorkout = response.data?.data?.workout;
+
+      if (!updatedWorkout) {
+        throw new Error("Updated workout was not returned");
+      }
+
+      onChanged(normalizeWorkout(updatedWorkout));
+      notify(`${exercise.name} added to this workout.`);
+    } catch (err) {
+      setError(getError(err));
+    } finally {
+      setAddingId("");
+    }
+  };
+
   const removeExercise = async (item) => {
     const exerciseId = item.exercise?._id || item.exercise;
+
     if (!exerciseId) {
       notify("Exercise ID is missing.", "error");
       return;
     }
 
-    if (!window.confirm(`Remove ${item.exercise?.name || "this exercise"}?`)) {
+    if (
+      !window.confirm(
+        `Remove ${item.exercise?.name || "this exercise"}?`
+      )
+    ) {
       return;
     }
 
@@ -486,7 +979,10 @@ function ManageExercises({
       );
 
       const updatedWorkout = response.data?.data?.workout;
-      if (!updatedWorkout) throw new Error("Updated workout was not returned");
+
+      if (!updatedWorkout) {
+        throw new Error("Updated workout was not returned");
+      }
 
       onChanged(normalizeWorkout(updatedWorkout));
       notify("Exercise removed.");
@@ -499,20 +995,24 @@ function ManageExercises({
 
   const updateExercise = async (item, values) => {
     const exerciseId = item.exercise?._id || item.exercise;
+
     if (!exerciseId) return;
 
     setBusyId(String(exerciseId));
     setError("");
 
     try {
-      // Requires PATCH /workouts/:id/exercises/:exerciseId in the backend.
+      // Requires PATCH /workouts/:id/exercises/:exerciseId in backend.
       const response = await request.patch(
         `/workouts/${workout._id}/exercises/${exerciseId}`,
         values
       );
 
       const updatedWorkout = response.data?.data?.workout;
-      if (!updatedWorkout) throw new Error("Updated workout was not returned");
+
+      if (!updatedWorkout) {
+        throw new Error("Updated workout was not returned");
+      }
 
       onChanged(normalizeWorkout(updatedWorkout));
       setEditingId("");
@@ -525,7 +1025,11 @@ function ManageExercises({
   };
 
   return (
-    <Modal title={`Manage · ${workout.name}`} onClose={onClose} wide>
+    <Modal
+      title={`Manage · ${workout.name}`}
+      onClose={onClose}
+      wide
+    >
       <div className="space-y-6">
         {error && (
           <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">
@@ -533,9 +1037,13 @@ function ManageExercises({
           </div>
         )}
 
+        {/* Existing workout exercises */}
         <section>
           <div className="mb-3 flex items-center justify-between gap-3">
-            <h3 className="font-semibold text-white">Workout exercises</h3>
+            <h3 className="font-semibold text-white">
+              Workout exercises
+            </h3>
+
             <span className="rounded-full bg-[#303030] px-3 py-1 text-xs text-neutral-300">
               {exercises.length} exercises
             </span>
@@ -543,7 +1051,10 @@ function ManageExercises({
 
           {exercises.length === 0 ? (
             <div className="rounded-xl border border-dashed border-[#404040] px-4 py-8 text-center">
-              <p className="font-medium text-neutral-300">No exercises yet</p>
+              <p className="font-medium text-neutral-300">
+                No exercises yet
+              </p>
+
               <p className="mt-1 text-sm text-neutral-500">
                 Add exercises from the library below.
               </p>
@@ -551,7 +1062,10 @@ function ManageExercises({
           ) : (
             <div className="space-y-3">
               {exercises.map((item, index) => {
-                const id = String(item.exercise?._id || item.exercise);
+                const id = String(
+                  item.exercise?._id || item.exercise
+                );
+
                 return (
                   <ExerciseRow
                     key={id}
@@ -570,9 +1084,21 @@ function ManageExercises({
           )}
         </section>
 
+        {/* Muscle tutorials */}
+        <MuscleTutorials
+          workout={workout}
+          library={library}
+          onAdd={addTutorialExercise}
+          addingId={addingId}
+        />
+
+        {/* Existing exercise library */}
         <section className="border-t border-[#363636] pt-5">
           <div className="mb-4">
-            <h3 className="font-semibold text-white">Exercise library</h3>
+            <h3 className="font-semibold text-white">
+              Exercise library
+            </h3>
+
             <p className="mt-1 text-sm text-neutral-500">
               Select an exercise to add it to this workout.
             </p>
@@ -596,7 +1122,9 @@ function ManageExercises({
           ) : (
             <div className="mt-3 max-h-72 space-y-2 overflow-y-auto pr-1">
               {filteredLibrary.map((exercise) => {
-                const alreadyAdded = existingIds.has(String(exercise._id));
+                const alreadyAdded = existingIds.has(
+                  String(exercise._id)
+                );
 
                 return (
                   <div
@@ -607,15 +1135,20 @@ function ManageExercises({
                       <p className="break-words text-sm font-medium text-neutral-100">
                         {exercise.name}
                       </p>
+
                       <p className="mt-1 text-xs text-neutral-500">
                         {(exercise.primaryMuscles || []).join(", ") ||
                           exercise.category ||
                           "Strength"}
                       </p>
                     </div>
+
                     <Button
                       variant={alreadyAdded ? "secondary" : "primary"}
-                      disabled={alreadyAdded || addingId === exercise._id}
+                      disabled={
+                        alreadyAdded ||
+                        addingId === exercise._id
+                      }
                       onClick={() => addExercise(exercise)}
                       className="shrink-0 px-3 py-2"
                     >
@@ -655,8 +1188,6 @@ export default function Workout() {
   const [showForm, setShowForm] = useState(false);
   const [manageWorkout, setManageWorkout] = useState(null);
 
-  // Cookies are sent with requests. If your app uses a different axios
-  // instance/interceptor, replace this with your existing instance.
   const request = useMemo(
     () =>
       axios.create({
@@ -697,13 +1228,20 @@ export default function Workout() {
 
   useEffect(() => {
     if (!toast) return undefined;
-    const timeout = window.setTimeout(() => setToast(null), 3500);
+
+    const timeout = window.setTimeout(
+      () => setToast(null),
+      3500
+    );
+
     return () => window.clearTimeout(timeout);
   }, [toast]);
 
   const filteredWorkouts = useMemo(() => {
     return workouts.filter((workout) => {
-      const matchesSearch = `${workout.name} ${workout.description || ""}`
+      const matchesSearch = `${workout.name} ${
+        workout.description || ""
+      }`
         .toLowerCase()
         .includes(search.toLowerCase());
 
@@ -712,21 +1250,30 @@ export default function Workout() {
         workout.difficulty === difficultyFilter;
 
       const matchesStatus =
-        statusFilter === "all" || workout.status === statusFilter;
+        statusFilter === "all" ||
+        workout.status === statusFilter;
 
-      return matchesSearch && matchesDifficulty && matchesStatus;
+      return (
+        matchesSearch &&
+        matchesDifficulty &&
+        matchesStatus
+      );
     });
   }, [workouts, search, difficultyFilter, statusFilter]);
 
   const stats = useMemo(
     () => ({
       total: workouts.length,
-      active: workouts.filter((item) => item.status === "active").length,
+      active: workouts.filter(
+        (item) => item.status === "active"
+      ).length,
       exercises: workouts.reduce(
         (total, item) => total + (item.exercises?.length || 0),
         0
       ),
-      completed: workouts.filter((item) => item.status === "completed").length,
+      completed: workouts.filter(
+        (item) => item.status === "completed"
+      ).length,
     }),
     [workouts]
   );
@@ -739,25 +1286,36 @@ export default function Workout() {
       const isEditing = Boolean(formWorkout?._id);
 
       const response = isEditing
-        ? await request.patch(`/workouts/${formWorkout._id}`, payload)
+        ? await request.patch(
+            `/workouts/${formWorkout._id}`,
+            payload
+          )
         : await request.post("/workouts", payload);
 
       const updated = response.data?.data?.workout;
-      if (!updated?._id) throw new Error("Workout was not returned");
+
+      if (!updated?._id) {
+        throw new Error("Workout was not returned");
+      }
 
       const normalized = normalizeWorkout(updated);
 
       setWorkouts((current) =>
         isEditing
           ? current.map((item) =>
-              item._id === normalized._id ? normalized : item
+              item._id === normalized._id
+                ? normalized
+                : item
             )
           : [normalized, ...current]
       );
 
       setShowForm(false);
       setFormWorkout(null);
-      notify(isEditing ? "Workout updated." : "Workout created.");
+
+      notify(
+        isEditing ? "Workout updated." : "Workout created."
+      );
     } catch (err) {
       setPageError(getError(err));
     } finally {
@@ -766,17 +1324,27 @@ export default function Workout() {
   };
 
   const deleteWorkout = async (workout) => {
-    if (!window.confirm(`Delete "${workout.name}" permanently?`)) return;
+    if (
+      !window.confirm(
+        `Delete "${workout.name}" permanently?`
+      )
+    ) {
+      return;
+    }
 
     setPageError("");
 
     try {
       await request.delete(`/workouts/${workout._id}`);
+
       setWorkouts((current) =>
         current.filter((item) => item._id !== workout._id)
       );
 
-      if (manageWorkout?._id === workout._id) setManageWorkout(null);
+      if (manageWorkout?._id === workout._id) {
+        setManageWorkout(null);
+      }
+
       notify("Workout deleted.");
     } catch (err) {
       setPageError(getError(err));
@@ -785,9 +1353,12 @@ export default function Workout() {
 
   const syncManagedWorkout = (updatedWorkout) => {
     setManageWorkout(updatedWorkout);
+
     setWorkouts((current) =>
       current.map((item) =>
-        item._id === updatedWorkout._id ? updatedWorkout : item
+        item._id === updatedWorkout._id
+          ? updatedWorkout
+          : item
       )
     );
   };
@@ -816,12 +1387,14 @@ export default function Workout() {
             <p className="text-xs font-bold uppercase tracking-[0.25em] text-neutral-500">
               AURA GO · TRAINING
             </p>
+
             <h1 className="mt-2 text-3xl font-black tracking-tight text-white sm:text-4xl">
               Workout Plans
             </h1>
+
             <p className="mt-2 max-w-xl text-sm text-neutral-400">
-              Build your training routine, organize exercises, and manage every
-              workout in one place.
+              Build your training routine, organize exercises, and
+              manage every workout in one place.
             </p>
           </div>
 
@@ -832,7 +1405,10 @@ export default function Workout() {
 
         {pageError && (
           <div className="flex flex-col justify-between gap-3 rounded-xl border border-red-500/30 bg-red-500/10 p-4 sm:flex-row sm:items-center">
-            <p className="break-words text-sm text-red-300">{pageError}</p>
+            <p className="break-words text-sm text-red-300">
+              {pageError}
+            </p>
+
             <Button
               variant="secondary"
               onClick={loadWorkouts}
@@ -843,6 +1419,7 @@ export default function Workout() {
           </div>
         )}
 
+        {/* Statistics */}
         <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           {[
             { label: "Total workouts", value: stats.total, icon: "▤" },
@@ -858,8 +1435,12 @@ export default function Workout() {
                 <p className="text-xs text-neutral-400 sm:text-sm">
                   {stat.label}
                 </p>
-                <span className="text-lg text-neutral-500">{stat.icon}</span>
+
+                <span className="text-lg text-neutral-500">
+                  {stat.icon}
+                </span>
               </div>
+
               <p className="mt-3 text-3xl font-bold tracking-tight text-white">
                 {stat.value}
               </p>
@@ -867,12 +1448,14 @@ export default function Workout() {
           ))}
         </section>
 
+        {/* Search and filters */}
         <section className="rounded-2xl border border-[#363636] bg-[#202020] p-4 sm:p-5">
           <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
             <div className="relative">
               <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-500">
                 ⌕
               </span>
+
               <input
                 className={cn(inputClass, "pl-10")}
                 value={search}
@@ -884,7 +1467,9 @@ export default function Workout() {
             <select
               className={inputClass}
               value={difficultyFilter}
-              onChange={(e) => setDifficultyFilter(e.target.value)}
+              onChange={(e) =>
+                setDifficultyFilter(e.target.value)
+              }
               aria-label="Filter by difficulty"
             >
               <option value="all">All difficulties</option>
@@ -907,9 +1492,13 @@ export default function Workout() {
           </div>
         </section>
 
+        {/* Workout cards */}
         <section>
           <div className="mb-4 flex items-center justify-between gap-3">
-            <h2 className="text-lg font-bold text-white">Your workouts</h2>
+            <h2 className="text-lg font-bold text-white">
+              Your workouts
+            </h2>
+
             <span className="text-sm text-neutral-500">
               {filteredWorkouts.length} found
             </span>
@@ -929,16 +1518,19 @@ export default function Workout() {
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#303030] text-2xl">
                 ◈
               </div>
+
               <h3 className="mt-4 text-lg font-bold text-white">
                 {workouts.length === 0
                   ? "Create your first workout"
                   : "No workouts found"}
               </h3>
+
               <p className="mx-auto mt-2 max-w-md text-sm text-neutral-500">
                 {workouts.length === 0
                   ? "Start with a workout plan and add exercises from your library."
                   : "Try changing your search or filters."}
               </p>
+
               {workouts.length === 0 && (
                 <Button onClick={openCreate} className="mt-5">
                   Create workout
@@ -956,10 +1548,12 @@ export default function Workout() {
                     <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-[#3a3a3a] bg-[#292929] text-xl">
                       ◈
                     </div>
+
                     <span
                       className={cn(
                         "rounded-full border px-3 py-1 text-xs font-medium capitalize",
-                        statusStyle[workout.status] || statusStyle.draft
+                        statusStyle[workout.status] ||
+                          statusStyle.draft
                       )}
                     >
                       {workout.status || "draft"}
@@ -969,6 +1563,7 @@ export default function Workout() {
                   <h3 className="mt-5 break-words text-xl font-bold text-white">
                     {workout.name}
                   </h3>
+
                   <p className="mt-2 min-h-10 break-words text-sm leading-6 text-neutral-400">
                     {workout.description || "No description added."}
                   </p>
@@ -977,9 +1572,11 @@ export default function Workout() {
                     <span className="rounded-lg bg-[#2b2b2b] px-2.5 py-1.5 text-xs capitalize text-neutral-300">
                       {workout.difficulty || "intermediate"}
                     </span>
+
                     <span className="rounded-lg bg-[#2b2b2b] px-2.5 py-1.5 text-xs text-neutral-300">
                       ◷ {workout.estimatedDuration || 0} min
                     </span>
+
                     <span className="rounded-lg bg-[#2b2b2b] px-2.5 py-1.5 text-xs text-neutral-300">
                       ◈ {workout.exercises.length} exercises
                     </span>
@@ -996,23 +1593,27 @@ export default function Workout() {
                       </p>
                     ) : (
                       <div className="space-y-2">
-                        {workout.exercises.slice(0, 3).map((item, index) => (
-                          <div
-                            key={
-                              item.exercise?._id ||
-                              item.exercise ||
-                              `${workout._id}-${index}`
-                            }
-                            className="flex min-w-0 items-center gap-2 text-sm"
-                          >
-                            <span className="text-neutral-600">
-                              {String(index + 1).padStart(2, "0")}
-                            </span>
-                            <span className="truncate text-neutral-300">
-                              {item.exercise?.name || "Exercise"}
-                            </span>
-                          </div>
-                        ))}
+                        {workout.exercises.slice(0, 3).map(
+                          (item, index) => (
+                            <div
+                              key={
+                                item.exercise?._id ||
+                                item.exercise ||
+                                `${workout._id}-${index}`
+                              }
+                              className="flex min-w-0 items-center gap-2 text-sm"
+                            >
+                              <span className="text-neutral-600">
+                                {String(index + 1).padStart(2, "0")}
+                              </span>
+
+                              <span className="truncate text-neutral-300">
+                                {item.exercise?.name || "Exercise"}
+                              </span>
+                            </div>
+                          )
+                        )}
+
                         {workout.exercises.length > 3 && (
                           <p className="text-xs text-neutral-500">
                             +{workout.exercises.length - 3} more
@@ -1029,12 +1630,14 @@ export default function Workout() {
                     >
                       <Icon>☷</Icon> Manage
                     </Button>
+
                     <Button
                       variant="secondary"
                       onClick={() => openEdit(workout)}
                     >
                       <Icon>✎</Icon> Edit
                     </Button>
+
                     <Button
                       variant="danger"
                       onClick={() => deleteWorkout(workout)}
