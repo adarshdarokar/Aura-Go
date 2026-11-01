@@ -6,6 +6,7 @@ const router = express.Router();
 const workoutRoutes = require("./workoutRoutes");
 const nutritionRoutes = require("./nutritionRoutes");
 const progressRoutes = require("./progressRoutes");
+const muscleTutorialRoutes = require("./muscleTutorialRoutes");
 const foodController = require("../controllers/foodController");
 const {
   calculateFoodNutritionController,
@@ -16,6 +17,7 @@ router.use("/exercises", exerciseRoutes);
 router.use("/workouts", workoutRoutes);
 router.use("/nutrition", nutritionRoutes);
 router.use("/progress", progressRoutes);
+router.use("/muscle-tutorials", muscleTutorialRoutes);
 
 // Food Search Route
 router.get("/foods", foodController.searchFoodsController);
