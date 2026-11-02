@@ -1,4 +1,3 @@
-
 const mongoose = require("mongoose");
 
 const muscleGroupSchema = new mongoose.Schema(
@@ -20,7 +19,18 @@ const muscleGroupSchema = new mongoose.Schema(
         ref: "Exercise",
       },
     ],
-
+    image: {
+      url: {
+        type: String,
+        default: "",
+        trim: true,
+      },
+      alt: {
+        type: String,
+        default: "",
+        trim: true,
+      },
+    },
     video: {
       url: {
         type: String,
@@ -40,7 +50,7 @@ const muscleGroupSchema = new mongoose.Schema(
       },
     },
   },
-  { _id: true }
+  { _id: true },
 );
 
 const muscleTutorialSchema = new mongoose.Schema(
@@ -63,10 +73,7 @@ const muscleTutorialSchema = new mongoose.Schema(
       default: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
-module.exports = mongoose.model(
-  "MuscleTutorial",
-  muscleTutorialSchema
-);
+module.exports = mongoose.model("MuscleTutorial", muscleTutorialSchema);
